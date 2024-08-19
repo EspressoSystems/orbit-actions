@@ -9,19 +9,18 @@ import "@arbitrum/nitro-contracts/src/rollup/IRollupAdmin.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-error IncorrectWasmModuleRoot(bytes32 incorrectAddr);
-
-error AddressIsNotContract(address incorrectAddr);
-
-error ChallengeManagerUpdated(address newChallengeManagerAddr);
-
-error OspNotUpgraded(address oldOspAddress);
-
-error WasmModuleRootNotUpdated(bytes32 oldWasmModuleRoot);
-
-
-
 contract OspMigrationAction{ 
+
+    error IncorrectWasmModuleRoot(bytes32 incorrectAddr);
+
+    error AddressIsNotContract(address incorrectAddr);
+
+    error ChallengeManagerUpdated(address newChallengeManagerAddr);
+
+    error OspNotUpgraded(address oldOspAddress);
+
+    error WasmModuleRootNotUpdated(bytes32 oldWasmModuleRoot);
+
     address public immutable newOspEntry;
     bytes32 public immutable newWasmModuleRoot;
     bytes32 public immutable currentWasmModuleRoot;
@@ -38,6 +37,29 @@ contract OspMigrationAction{
         address _rollup,
         address _proxyAdmin
     ){
+        if(_newWasmModuleRoot == bytes32(0)){
+            revert IncorrectWasmModuleRoot(_newWasmModuleRoot);
+        }
+
+        if(_currentWasmModuleRoot == bytes32(0)){
+            revert IncorrectWasmModuleRoot(_currentWasmModuleRoot);
+        }
+
+        if(!Address.isContract(_newOspEntry)){
+            revert AddressIsNotContract(_newOspEntry);
+        }
+
+        if(!Address.isContract(_currentOspEntry)){
+            revert AddressIsNotContract(_currentOspEntry);
+        }
+
+        if(!Address.isContract(_proxyAdmin)){
+            revert AddressIsNotContract(_proxyAdmin);
+        }
+
+        if(!Address.isContract(_rollup)){
+            revert AddressIsNotContract(_rollup);
+        }
         newOspEntry = _newOspEntry;
         newWasmModuleRoot = _newWasmModuleRoot;
         currentOspEntry = _currentOspEntry;
@@ -48,22 +70,7 @@ contract OspMigrationAction{
 
     function perform() external{
         //Handle assertions in the perform functoin as we shouldn't be storing local state for delegated calls.
-        if(newWasmModuleRoot == bytes32(0)){
-            revert IncorrectWasmModuleRoot(newWasmModuleRoot);
-        }
-
-        if(currentWasmModuleRoot == bytes32(0)){
-            revert IncorrectWasmModuleRoot(currentWasmModuleRoot);
-        }
-
-        if(Address.isContract(newOspEntry) == false){
-            revert AddressIsNotContract(newOspEntry);
-        }
-
-        if(Address.isContract(currentOspEntry) == false){
-            revert AddressIsNotContract(currentOspEntry);
-        }
-
+        
         // set the new challenge manager impl
         TransparentUpgradeableProxy challengeManager =
             TransparentUpgradeableProxy(payable(address(IRollupCore(rollup).challengeManager())));
