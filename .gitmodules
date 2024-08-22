@@ -5,8 +5,5 @@
 	path = lib/arbitrum-sdk
 	url = https://github.com/OffchainLabs/arbitrum-sdk
 [submodule "lib/nitro-contracts.git"]
-	path = lib/nitro-contracts.git
-	url = https://github.com/EspressoSystems/nitro-contracts.git
-[submodule "lib/nitro-contracts"]
 	path = lib/nitro-contracts
 	url = https://github.com/EspressoSystems/nitro-contracts
