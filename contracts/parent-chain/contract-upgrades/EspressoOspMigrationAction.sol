@@ -69,7 +69,7 @@ contract OspMigrationAction{
     }
 
     function perform() external{
-        //Handle assertions in the perform functoin as we shouldn't be storing local state for delegated calls.
+        //Handle assertions in the perform function as we shouldn't be storing local state for delegated calls.
         
         // set the new challenge manager impl
         TransparentUpgradeableProxy challengeManager =

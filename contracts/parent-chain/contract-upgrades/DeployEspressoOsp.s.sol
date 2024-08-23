@@ -2,11 +2,11 @@
 pragma solidity ^0.8.9;
 
 import "forge-std/Script.sol";
-import "nitro-contracts.git/osp/OneStepProverMemory.sol";
-import "nitro-contracts.git/osp/OneStepProverMath.sol";
-import "nitro-contracts.git/osp/OneStepProverHostIo.sol";
-import "nitro-contracts.git/osp/OneStepProver0.sol";
-import "nitro-contracts.git/osp/OneStepProofEntry.sol";
+import "nitro-contracts/osp/OneStepProverMemory.sol";
+import "nitro-contracts/osp/OneStepProverMath.sol";
+import "nitro-contracts/osp/OneStepProverHostIo.sol";
+import "nitro-contracts/osp/OneStepProver0.sol";
+import "nitro-contracts/osp/OneStepProofEntry.sol";
 
 
 contract DeployEspressoOsp is Script{
@@ -20,7 +20,6 @@ contract DeployEspressoOsp is Script{
             new OneStepProverMath(),
             new OneStepProverHostIo(hotshotAddr)
         );
-
         vm.stopBroadcast();
     }
 }
