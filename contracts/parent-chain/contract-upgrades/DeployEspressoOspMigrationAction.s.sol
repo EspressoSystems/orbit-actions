@@ -9,6 +9,6 @@ contract DeployEspressoOspMigrationAction is Script{
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
         EspressoOspMigrationAction migrationAction = new EspressoOspMigrationAction();
-        vm.startBroadcast(deployerPrivateKey);
+        vm.stopBroadcast();
     }
 }
