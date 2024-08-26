@@ -108,7 +108,7 @@ contract EspressoOspMigrationAction is OspMigrationAction, Script{
             bytes32(0x2422802a7cda99737209430b103689205bc8e56eab8b08c6ad409e65e45c3145),
             address(0x9C2eD9F57D053FDfAEcBF1B6Dfd7C97e2e340B84),
             bytes32(0xbc1026ff45c20ea97e9e6057224a5668ea78d8f885c9b14fc849238e8ef5c5dc),
-            address(0x0DFDF1473B14D2330A40F6a42bb6d601DD121E6b),
+            address(0x3cf538A94538a25ee3bcA0287aB530ACCf9Dbaf6),
             address(0x2A1f38c9097e7883570e0b02BFBE6869Cc25d8a3)
         )
         {}
