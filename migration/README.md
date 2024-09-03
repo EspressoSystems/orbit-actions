@@ -1,0 +1,124 @@
+# Migrating your orbit chain to be compatible with the Espresso network.
+
+This guide is intended for orbit chain operators that want to migrate their orbit chain to be compatible with the Espresso network.
+It will provide step by step instructions that will walk you through the migration process
+
+### Table of contents:
+    1. Pre-requisites
+    2. Contract deployments
+        2a.Parent chain deployments
+        2b.Child chain deployments
+    3. Contract execution
+        3a. Parent chain execution
+        3b. Child chain execution
+
+## Pre-requisites
+
+Before starting the migration process, it is important to gather some information that will be necessary for the coming steps.
+
+The following information is necessary for the migration: 
+
+    - Rollup proxy addres: The address of proxy contract managing the rollup logic for your orbit chain.
+
+    - Parent chain id: The chain id of the parent chain that has your rollup contracts
+
+    - Child chain id: The chain id for your orbit chain
+    
+    - Parent chain RPC URL: The RPC URL for the parent chain that has your rollup contracts 
+    
+    - Child chain RPC URL: The RPC URL for your orbit chain
+
+    - Hotshot address: The address of the hotshot client contract on the parent chain.
+
+    - Parent chain upgrade executor address: The address of the upgrade executor for your rollup on the parent chain
+
+    - Child chain upgrade executor address: The address of the upgrade executor for your rollup on the child chain.
+
+    - New wasm module root: The new wasmModuleRoot of the STF function from the espresso integration. This is critical to enable fraud proofs post migration.
+
+    - Current wasm module root: The current wasm module root that your chain has. This is critical for maintaining backwards compatible fraud proofs for blocks before the migration.
+
+    - Current osp entry: The address of the current osp entry on the parent chain. This is critical to maintain backwards compatible fraud proofs.
+
+    - Proxy admin: The address of the proxy admin for your rollup on the parent chain
+
+    - Upgrade timestamp: The unix timestamp you wish to perform the ArbOS upgrade at.
+
+We would reccommend that you aggregate these in a .env file in variables of the same names to the ones in .example-env so that you can export them when running the commands presented in future sections of this guide.
+
+#### A note on Upgrade Executors
+
+This migration presumes there to be upgrade executor contracts that are chain/rollup owners on both the parent chain, as well as the child chain. If you do not have an upgrade executor on the child chain, the contract execution commands at the end of this guide will not work.
+
+## Contract Deployments
+
+### Parent chain deployments
+
+The parent chain is where most of the contract deployments will happen for the migration to espresso. There are two forge scripts that you need to deploy on the parent chain. These scripts are located in the following directories:
+
+```
+orbit-actions/contracts/parent-chain/espresso-migration/DeployEspressoOsp.s.sol
+```
+and
+```
+orbit-action/contracts/parent-chain/espresso-migration/DeployEspressoOspMigrationAction.s.sol
+```
+
+These must ***MUST*** be deployed in the following order:
+
+1. DeployEspressoOsp.s.sol
+2. DeployEspressoOspMigrationAction.s.sol
+
+In between these deployments you need to record the address of the newly deployed OneStepProverEntry contract and export it in the env var `NEW_OSP_ENTRY` 
+
+**IMPORTANT NOTE:**
+    These commands will depend on certain environment variables being populated. If you havent already make sure to source the env file with all of the pre-requisite information.
+
+#### DeployEspressoOsp.s.sol
+```
+forge script --chain $PARENT_CHAIN_CHAIN_ID contracts/parent-chain/contract-upgrades/DeployEspressoOsp.s.sol:DeployEspressoOsp --rpc-url $PARENT_CHAIN_RPC_URL --broadcast -vvvv
+```
+#### DeployEspressoOspMigrationAction.s.sol
+```
+forge script --chain $PARENT_CHAIN_CHAIN_ID contracts/parent-chain/contract-upgrades/DeployEspressoOspMigrationAction.s.sol --rpc-url $PARENT_CHAIN_RPC_URL --broadcast -vvvv
+
+```
+
+Similarly to the OSP entry deployment, you should record the address to which the OSP migration action is deployed into the env var `OSP_MIGRATION_ACTION
+`
+### Child chain deployments
+
+There is only one forge script to run for deployments on the child chain, DeployArbOSUpgradeAction.s.sol. This script lives in the following location:
+
+```
+orbit-actions/contracts/child-chain/arbos-upgrade/DeployArbOSUpgradeAction.s.sol
+```
+
+You can deploy this contract to the child chain with the following command:
+
+```
+forge script --chain $CHILD_CHAIN_CHAIN_id contracts/child-chain/arbos-upgrade/DeployArbOSUpgradeAction.s.sol:DeployArbOSUpgradeAction  --rpc-url $CHILD_CHAIN_RPC_URL --broadcast -vvvv
+
+```
+You should store the address of the newly deployed upgrade action in the env var `ARBOS_UPGRADE_ACTION`
+
+
+## Contract execution
+
+Two of contracts deployed in the previous steps require additional steps to execute them on the parent a child chains for your rollup. 
+
+### Parent chain contract execution
+
+On the parent chain you need to call the `perform()` function on the EspressoOspMigrationAction contract with the following command:
+
+```
+cast send $PARENT_CHAIN_UPGRADE_EXECUTOR "execute(address, bytes)" $OSP_MIGRATION_ACTION $(cast calldata "perform()") --rpc-url $PARENT_CHAIN_RPC_URL --private-key $PRIVATE_KEY
+```
+
+### Child chain contract execution
+
+On the parent chain you need to call the `perform()` function on the EspressoArbOSUpgrade contract with the following command:
+
+```
+cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" $ARBOS_UPGRADE_ACTION $(cast calldata "perform()") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
+```
