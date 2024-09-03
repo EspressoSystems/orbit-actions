@@ -5,10 +5,12 @@ import "forge-std/Script.sol";
 import "./UpgradeArbOSVersionAtTimestampAction.sol";
 
 contract EspressoArbOSUpgrade is UpgradeArbOSVersionAtTimestampAction, Script   {
-    constructor()
+    constructor(
+        uint64 upgradeTimestamp
+    )
         UpgradeArbOSVersionAtTimestampAction(
             35,
-            uint64(0)
+            upgradeTimestamp
         )
         {}
 }
