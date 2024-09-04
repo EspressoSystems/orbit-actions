@@ -17,7 +17,7 @@ import '@arbitrum/nitro-contracts/src/rollup/RollupUserLogic.sol';
 import '@arbitrum/nitro-contracts/src/rollup/ValidatorUtils.sol';
 import '@arbitrum/nitro-contracts/src/rollup/ValidatorWalletCreator.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import "../parent-chain/contract-upgrades/EspressoOspMigrationAction.sol";
+import "../parent-chain/espresso-migration/EspressoOspMigrationAction.sol";
 
 contract EspressoOspMigrationAction is OspMigrationAction, Script{
     constructor()
