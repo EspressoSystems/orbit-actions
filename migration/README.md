@@ -28,7 +28,7 @@ The following information is necessary for the migration:
     
     - Child chain RPC URL: The RPC URL for your orbit chain
 
-    - Hotshot address: The address of the hotshot client contract on the parent chain.
+    - Hotshot address: The address of the hotshot light client contract on the parent chain.
 
     - Parent chain upgrade executor address: The address of the upgrade executor for your rollup on the parent chain
 
