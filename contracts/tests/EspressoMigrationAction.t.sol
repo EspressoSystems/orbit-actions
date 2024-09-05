@@ -2,24 +2,24 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import '@arbitrum/nitro-contracts/src/challenge/IChallengeManager.sol';
-import '@arbitrum/nitro-contracts/src/challenge/ChallengeManager.sol';
-import '@arbitrum/nitro-contracts/src/osp/OneStepProver0.sol';
-import '@arbitrum/nitro-contracts/src/osp/OneStepProverMemory.sol';
-import '@arbitrum/nitro-contracts/src/osp/OneStepProverMath.sol';
-import '@arbitrum/nitro-contracts/src/osp/OneStepProverHostIo.sol';
-import '@arbitrum/nitro-contracts/src/osp/OneStepProofEntry.sol';
-import '@arbitrum/nitro-contracts/src/mocks/UpgradeExecutorMock.sol';
-import '@arbitrum/nitro-contracts/src/rollup/RollupCore.sol';
-import '@arbitrum/nitro-contracts/src/rollup/RollupCreator.sol';
-import '@arbitrum/nitro-contracts/src/rollup/RollupAdminLogic.sol';
-import '@arbitrum/nitro-contracts/src/rollup/RollupUserLogic.sol';
-import '@arbitrum/nitro-contracts/src/rollup/ValidatorUtils.sol';
-import '@arbitrum/nitro-contracts/src/rollup/ValidatorWalletCreator.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import "@arbitrum/nitro-contracts/src/challenge/IChallengeManager.sol";
+import "@arbitrum/nitro-contracts/src/challenge/ChallengeManager.sol";
+import "@arbitrum/nitro-contracts/src/osp/OneStepProver0.sol";
+import "@arbitrum/nitro-contracts/src/osp/OneStepProverMemory.sol";
+import "@arbitrum/nitro-contracts/src/osp/OneStepProverMath.sol";
+import "@arbitrum/nitro-contracts/src/osp/OneStepProverHostIo.sol";
+import "@arbitrum/nitro-contracts/src/osp/OneStepProofEntry.sol";
+import "@arbitrum/nitro-contracts/src/mocks/UpgradeExecutorMock.sol";
+import "@arbitrum/nitro-contracts/src/rollup/RollupCore.sol";
+import "@arbitrum/nitro-contracts/src/rollup/RollupCreator.sol";
+import "@arbitrum/nitro-contracts/src/rollup/RollupAdminLogic.sol";
+import "@arbitrum/nitro-contracts/src/rollup/RollupUserLogic.sol";
+import "@arbitrum/nitro-contracts/src/rollup/ValidatorUtils.sol";
+import "@arbitrum/nitro-contracts/src/rollup/ValidatorWalletCreator.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import "../parent-chain/espresso-migration/EspressoOspMigrationAction.sol";
 
-contract EspressoOspMigrationAction is OspMigrationAction, Script{
+contract EspressoOspMigrationAction is OspMigrationAction, Script {
     constructor()
         OspMigrationAction(
             address(0xBD110dAd17e1d4e6A629407474c9Ea4bbdEFa338),
@@ -29,7 +29,7 @@ contract EspressoOspMigrationAction is OspMigrationAction, Script{
             address(0x3cf538A94538a25ee3bcA0287aB530ACCf9Dbaf6),
             address(0x2A1f38c9097e7883570e0b02BFBE6869Cc25d8a3)
         )
-        {}
+    {}
 }
 
 contract MockHotShot {
@@ -40,15 +40,14 @@ contract MockHotShot {
     }
 }
 
-contract MigrationTest is Test{
-
-    RollupCreator public rollupCreator;// save the rollup creators address for bindings in the test.
-    address public rollupAddress;// save the rollup address for bindings in the test.
+contract MigrationTest is Test {
+    RollupCreator public rollupCreator; // save the rollup creators address for bindings in the test.
+    address public rollupAddress; // save the rollup address for bindings in the test.
     address public rollupOwner = makeAddr("rollupOwner");
     address public deployer = makeAddr("deployer");
     IRollupAdmin public rollupAdmin;
     IRollupUser public rollupUser;
-    DeployHelper public deployHelper;   
+    DeployHelper public deployHelper;
     IReader4844 dummyReader4844 = IReader4844(address(137));
     MockHotShot public hotshot = new MockHotShot();
     IUpgradeExecutor upgradeExecutor;
@@ -56,33 +55,27 @@ contract MigrationTest is Test{
     IOneStepProofEntry originalOspEntry;
     IOneStepProofEntry newOspEntry = IOneStepProofEntry(
         new OneStepProofEntry(
-            new OneStepProver0(),
-            new OneStepProverMemory(),
-            new OneStepProverMath(),
-            new OneStepProverHostIo()
+            new OneStepProver0(), new OneStepProverMemory(), new OneStepProverMath(), new OneStepProverHostIo()
         )
-    );  
+    );
 
     uint256 public constant MAX_FEE_PER_GAS = 1_000_000_000;
     uint256 public constant MAX_DATA_SIZE = 117_964;
 
-    BridgeCreator.BridgeContracts public ethBasedTemplates =
-        BridgeCreator.BridgeContracts({
-            bridge: new Bridge(),
-            sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, false),
-            inbox: new Inbox(MAX_DATA_SIZE),
-            rollupEventInbox: new RollupEventInbox(),
-            outbox: new Outbox()
-        });
-    BridgeCreator.BridgeContracts public erc20BasedTemplates =
-        BridgeCreator.BridgeContracts({
-            bridge: new ERC20Bridge(),
-            sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, true),
-            inbox: new ERC20Inbox(MAX_DATA_SIZE),
-            rollupEventInbox: new ERC20RollupEventInbox(),
-            outbox: new ERC20Outbox()
-        });
-
+    BridgeCreator.BridgeContracts public ethBasedTemplates = BridgeCreator.BridgeContracts({
+        bridge: new Bridge(),
+        sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, false),
+        inbox: new Inbox(MAX_DATA_SIZE),
+        rollupEventInbox: new RollupEventInbox(),
+        outbox: new Outbox()
+    });
+    BridgeCreator.BridgeContracts public erc20BasedTemplates = BridgeCreator.BridgeContracts({
+        bridge: new ERC20Bridge(),
+        sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, true),
+        inbox: new ERC20Inbox(MAX_DATA_SIZE),
+        rollupEventInbox: new ERC20RollupEventInbox(),
+        outbox: new ERC20Outbox()
+    });
 
     /* solhint-disable func-name-mixedcase */
     //create items needed for a rollup and deploy it. This code is lovingly borrowed from the rollupcreator.t.sol foundry test.
@@ -127,13 +120,9 @@ contract MigrationTest is Test{
             deployHelper
         );
 
-                // deployment params
-        ISequencerInbox.MaxTimeVariation memory timeVars = ISequencerInbox.MaxTimeVariation(
-            ((60 * 60 * 24) / 15),
-            12,
-            60 * 60 * 24,
-            60 * 60
-        );
+        // deployment params
+        ISequencerInbox.MaxTimeVariation memory timeVars =
+            ISequencerInbox.MaxTimeVariation(((60 * 60 * 24) / 15), 12, 60 * 60 * 24, 60 * 60);
         Config memory config = Config({
             confirmPeriodBlocks: 20,
             extraChallengeTimeBlocks: 200,
@@ -160,20 +149,17 @@ contract MigrationTest is Test{
         validators[0] = makeAddr("validator1");
         validators[1] = makeAddr("validator2");
 
-        RollupCreator.RollupDeploymentParams memory deployParams = RollupCreator
-            .RollupDeploymentParams({
-                config: config,
-                batchPosters: batchPosters,
-                validators: validators,
-                maxDataSize: MAX_DATA_SIZE,
-                nativeToken: address(0),
-                deployFactoriesToL2: true,
-                maxFeePerGasForRetryables: MAX_FEE_PER_GAS,
-                batchPosterManager: batchPosterManager
-            });
-        rollupAddress = rollupCreator.createRollup{value: factoryDeploymentFunds}(
-            deployParams
-        );
+        RollupCreator.RollupDeploymentParams memory deployParams = RollupCreator.RollupDeploymentParams({
+            config: config,
+            batchPosters: batchPosters,
+            validators: validators,
+            maxDataSize: MAX_DATA_SIZE,
+            nativeToken: address(0),
+            deployFactoriesToL2: true,
+            maxFeePerGasForRetryables: MAX_FEE_PER_GAS,
+            batchPosterManager: batchPosterManager
+        });
+        rollupAddress = rollupCreator.createRollup{value: factoryDeploymentFunds}(deployParams);
 
         vm.stopPrank();
     }
@@ -189,10 +175,7 @@ contract MigrationTest is Test{
     {
         //// deploy challenge stuff
         ospEntry = new OneStepProofEntry(
-            new OneStepProver0(),
-            new OneStepProverMemory(),
-            new OneStepProverMath(),
-            new OneStepProverHostIo()
+            new OneStepProver0(), new OneStepProverMemory(), new OneStepProverMath(), new OneStepProverHostIo()
         );
         challengeManager = new ChallengeManager();
 
@@ -208,10 +191,10 @@ contract MigrationTest is Test{
         return address(uint160(uint256(vm.load(proxy, adminSlot))));
     }
 
-    function test_migrateToEspresso() public{
+    function test_migrateToEspresso() public {
         //begin by seting pre-requisites in the vm so the test can get the data it needs.
         IRollupCore rollup = IRollupCore(rollupAddress);
-       
+
         address upgradeExecutorExpectedAddress = computeCreateAddress(address(rollupCreator), 4);
         //ensure we have the correct address for the proxy admin
         assertEq(
@@ -220,9 +203,7 @@ contract MigrationTest is Test{
             "Invalid proxyAdmin's owner"
         );
 
-        IUpgradeExecutor _upgradeExecutor = IUpgradeExecutor(
-            upgradeExecutorExpectedAddress
-        );
+        IUpgradeExecutor _upgradeExecutor = IUpgradeExecutor(upgradeExecutorExpectedAddress);
 
         vm.setEnv("NEW_OSP_ENTRY", Strings.toHexString(uint256(uint160(address(newOspEntry)))));
         vm.setEnv("CURRENT_OSP_ENTRY", Strings.toHexString(uint256(uint160(address(originalOspEntry)))));
@@ -230,19 +211,28 @@ contract MigrationTest is Test{
         vm.setEnv("PROXY_ADMIN", Strings.toHexString(uint256(uint160(computeCreateAddress(address(rollupCreator), 1)))));
         vm.setEnv("NEW_WASM_MODULE_ROOT", Strings.toHexString(uint256(keccak256("newRoot"))));
         vm.setEnv("CURRENT_WASM_MODULE_ROOT", Strings.toHexString(uint256(keccak256("wasm"))));
-        bytes memory data = abi.encodeWithSelector(
-            OspMigrationAction.perform.selector  
-        );
-        
+        bytes memory data = abi.encodeWithSelector(OspMigrationAction.perform.selector);
+
         address migration = address(new EspressoOspMigrationAction());
 
         vm.prank(rollupOwner);
         _upgradeExecutor.execute(migration, data);
         vm.stopPrank();
 
-        assertEq(address(rollup.challengeManager().getOsp(bytes32(uint256(keccak256("wasm"))))), address(originalOspEntry), "CondOsp at original root is not what was expected.");
-        assertEq(address(rollup.challengeManager().getOsp(bytes32(uint256(keccak256("newRoot"))))), address(newOspEntry), "CondOsp at new root is not what was expected.");
-        assertEq(rollup.wasmModuleRoot(), bytes32(uint256(keccak256("newRoot"))), "Rollup's wasmModuleRoot was not changed by migration");
+        assertEq(
+            address(rollup.challengeManager().getOsp(bytes32(uint256(keccak256("wasm"))))),
+            address(originalOspEntry),
+            "CondOsp at original root is not what was expected."
+        );
+        assertEq(
+            address(rollup.challengeManager().getOsp(bytes32(uint256(keccak256("newRoot"))))),
+            address(newOspEntry),
+            "CondOsp at new root is not what was expected."
+        );
+        assertEq(
+            rollup.wasmModuleRoot(),
+            bytes32(uint256(keccak256("newRoot"))),
+            "Rollup's wasmModuleRoot was not changed by migration"
+        );
     }
-
 }

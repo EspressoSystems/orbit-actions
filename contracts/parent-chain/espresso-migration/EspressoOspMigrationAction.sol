@@ -9,8 +9,7 @@ import "@arbitrum/nitro-contracts/src/rollup/IRollupAdmin.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-contract OspMigrationAction{ 
-
+contract OspMigrationAction {
     error IncorrectWasmModuleRoot(bytes32 incorrectAddr);
 
     error AddressIsNotContract(address incorrectAddr);
@@ -28,7 +27,6 @@ contract OspMigrationAction{
     address public immutable rollup;
     address public immutable proxyAdmin;
 
-
     constructor(
         address _newOspEntry,
         bytes32 _newWasmModuleRoot,
@@ -36,28 +34,28 @@ contract OspMigrationAction{
         bytes32 _currentWasmModuleRoot,
         address _rollup,
         address _proxyAdmin
-    ){
-        if(_newWasmModuleRoot == bytes32(0)){
+    ) {
+        if (_newWasmModuleRoot == bytes32(0)) {
             revert IncorrectWasmModuleRoot(_newWasmModuleRoot);
         }
 
-        if(_currentWasmModuleRoot == bytes32(0)){
+        if (_currentWasmModuleRoot == bytes32(0)) {
             revert IncorrectWasmModuleRoot(_currentWasmModuleRoot);
         }
 
-        if(!Address.isContract(_newOspEntry)){
+        if (!Address.isContract(_newOspEntry)) {
             revert AddressIsNotContract(_newOspEntry);
         }
 
-        if(!Address.isContract(_currentOspEntry)){
+        if (!Address.isContract(_currentOspEntry)) {
             revert AddressIsNotContract(_currentOspEntry);
         }
 
-        if(!Address.isContract(_proxyAdmin)){
+        if (!Address.isContract(_proxyAdmin)) {
             revert AddressIsNotContract(_proxyAdmin);
         }
 
-        if(!Address.isContract(_rollup)){
+        if (!Address.isContract(_rollup)) {
             revert AddressIsNotContract(_rollup);
         }
         newOspEntry = _newOspEntry;
@@ -68,9 +66,9 @@ contract OspMigrationAction{
         proxyAdmin = _proxyAdmin;
     }
 
-    function perform() external{
+    function perform() external {
         //Handle assertions in the perform function as we shouldn't be storing local state for delegated calls.
-        
+
         // set the new challenge manager impl
         TransparentUpgradeableProxy challengeManager =
             TransparentUpgradeableProxy(payable(address(IRollupCore(rollup).challengeManager())));
@@ -78,24 +76,29 @@ contract OspMigrationAction{
         ProxyAdmin(proxyAdmin).upgradeAndCall(
             challengeManager,
             chalManImpl, // Use the rollups current challenge manager as we only need to upgrade the OSP
-            abi.encodeWithSelector(IChallengeManager.postUpgradeInit.selector, IOneStepProofEntry(newOspEntry), currentWasmModuleRoot, IOneStepProofEntry(currentOspEntry))
+            abi.encodeWithSelector(
+                IChallengeManager.postUpgradeInit.selector,
+                IOneStepProofEntry(newOspEntry),
+                currentWasmModuleRoot,
+                IOneStepProofEntry(currentOspEntry)
+            )
         );
         address postUpgradeChalManAddr = ProxyAdmin(proxyAdmin).getProxyImplementation(challengeManager);
 
-        if(postUpgradeChalManAddr != chalManImpl){
+        if (postUpgradeChalManAddr != chalManImpl) {
             revert ChallengeManagerUpdated(postUpgradeChalManAddr);
         }
         IOneStepProofEntry newOsp = IChallengeManager(address(challengeManager)).osp();
 
-        if(newOsp != IOneStepProofEntry(newOspEntry) ){
+        if (newOsp != IOneStepProofEntry(newOspEntry)) {
             revert OspNotUpgraded(address(newOsp));
         }
-        
+
         IRollupAdmin(rollup).setWasmModuleRoot(newWasmModuleRoot);
 
         bytes32 postUpgradeWasmModuleRoot = IRollupCore(rollup).wasmModuleRoot();
 
-        if(postUpgradeWasmModuleRoot != newWasmModuleRoot){
+        if (postUpgradeWasmModuleRoot != newWasmModuleRoot) {
             revert WasmModuleRootNotUpdated(postUpgradeWasmModuleRoot);
         }
     }
