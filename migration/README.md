@@ -135,6 +135,15 @@ To enable the behavior in the STF that provides compatibility with the Espresso 
 
 There is an example chain config json file in the same directory as this README to show which fields need to be added to the standard Arbitrum chain config.
 
+Ensure that values other than the new Espresso field are the same values as they are in your current chain config.
+
 The request to the ArbOwner precompile must come from an address designated as a chain owner. Typically this is the `UpgradeExecutor`.
 
-cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" 0x0000000000000000000000000000000000000070 $(cast calldata "setChainConfig(string)" "$(cat ./test-chain-config.json)") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
+The following command uses cast and the `UpgradeExecutor` to send the new chain config to the network.
+
+Note: The address 0x0000000000000000000000000000000000000070 is the hard-coded address of the ArbOwner precompile on arbitrum derived chains.
+
+```
+cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" 0x0000000000000000000000000000000000000070 $(cast calldata "setChainConfig(string)" "$(cat /chain/config/location)") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
+```
+
