@@ -128,3 +128,23 @@ On the parent chain you need to call the `perform()` function on the EspressoArb
 ```
 cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" $ARBOS_UPGRADE_ACTION $(cast calldata "perform()") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
 ```
+
+## Enabling Espresso STF behavior
+
+To enable the behavior in the STF that provides compatibility with the Espresso network, you must send a request (via cast) to the `ArbOwner` precompile to update your networks chain config.
+
+There is an example chain config json file in the same directory as this README to show which fields need to be added to the standard Arbitrum chain config.
+
+Ensure that values other than the new Espresso field are the same values as they are in your current chain config. It is **incredibly important** that the node with espresso compatible code is loaded with a chain config that contains the `EnableEspresso` flag inside the arbitrum chain parameters. If the config doesn't contain this flag, attempting to set the chain config in the following manner will cause the delegated call from the `UpgradeExecutor` to revert.
+
+The request to the ArbOwner precompile must come from an address designated as a chain owner. Typically this is the `UpgradeExecutor`.
+
+The following command uses cast and the `UpgradeExecutor` to send the new chain config to the network.
+
+Note: The address 0x0000000000000000000000000000000000000070 is the hard-coded address of the ArbOwner precompile on arbitrum derived chains.
+
+
+```
+cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" 0x0000000000000000000000000000000000000070 $(cast calldata "setChainConfig(string)" "$(cat /chain/config/location)") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
+```
+
