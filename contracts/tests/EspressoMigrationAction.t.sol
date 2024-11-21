@@ -20,18 +20,10 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import "../parent-chain/espresso-migration/EspressoSequencerInboxMigrationAction.sol";
 import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier.sol";
 
-contract MockHotShot {
-    mapping(uint256 => uint256) public commitments;
-
-    function setCommitment(uint256 height, uint256 commitment) external {
-        commitments[height] = commitment;
-    }
-}
-
 contract MigrationTest is Test {
     IReader4844 dummyReader4844 = IReader4844(address(137));
     address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true));
-    
+
     RollupCreator public rollupCreator; // save the rollup creators address for bindings in the test.
     address public rollupAddress; // save the rollup address for bindings in the test.
     address public rollupOwner = makeAddr("rollupOwner");
@@ -40,7 +32,6 @@ contract MigrationTest is Test {
     IRollupUser public rollupUser;
     DeployHelper public deployHelper;
 
-    MockHotShot public hotshot = new MockHotShot();
     IUpgradeExecutor upgradeExecutor;
 
     uint256 public constant MAX_FEE_PER_GAS = 1_000_000_000;
@@ -68,10 +59,6 @@ contract MigrationTest is Test {
         vm.startPrank(deployer);
         rollupCreator = new RollupCreator();
         deployHelper = new DeployHelper();
-
-        for (uint256 i = 1; i < 10; i++) {
-            hotshot.setCommitment(uint256(i), uint256(i));
-        }
 
         // deploy BridgeCreators
         BridgeCreator bridgeCreator = new BridgeCreator(ethBasedTemplates, erc20BasedTemplates);
@@ -183,15 +170,12 @@ contract MigrationTest is Test {
         address upgradeExecutorExpectedAddress = computeCreateAddress(address(rollupCreator), 4);
         //ensure we have the correct address for the proxy admin
         ProxyAdmin admin = ProxyAdmin(_getProxyAdmin(address(rollup.sequencerInbox())));
-        assertEq(
-            admin.owner(),
-            upgradeExecutorExpectedAddress,
-            "Invalid proxyAdmin's owner"
-        );
+        assertEq(admin.owner(), upgradeExecutorExpectedAddress, "Invalid proxyAdmin's owner");
 
         IUpgradeExecutor _upgradeExecutor = IUpgradeExecutor(upgradeExecutorExpectedAddress);
 
-        bytes memory data = abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector, rollup, admin);
+        bytes memory data =
+            abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector, rollup, admin);
 
         address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress));
 
@@ -200,7 +184,9 @@ contract MigrationTest is Test {
         vm.stopPrank();
 
         assertEq(
-            address(admin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rollup.sequencerInbox()))))),
+            address(
+                admin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rollup.sequencerInbox()))))
+            ),
             address(newSequencerImplAddress),
             "Sequencer Inbox has not been updated"
         );
