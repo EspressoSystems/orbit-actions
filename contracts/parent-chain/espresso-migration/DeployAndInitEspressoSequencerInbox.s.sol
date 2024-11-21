@@ -36,7 +36,7 @@ contract DeployAndInitEspressoSequencerInbox is Script {
          delayblocks: delayBlocks,
          futureBlocks: futureBlocks,
          delaySeconds: delaySeconds,
-         futureSeconds: futureSeconds,
+         futureSeconds: futureSeconds
         });
         sequencerInbox.initialize(bridge, maxTimeVariation);
         // Setting batch posters and batch poster manager
