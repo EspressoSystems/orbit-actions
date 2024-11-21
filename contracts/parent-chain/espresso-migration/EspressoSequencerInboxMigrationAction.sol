@@ -17,9 +17,7 @@ import "nitro-contracts/rollup/IRollupLogic.sol";
 contract EspressoSequencerInboxMigrationAction {
     address public immutable newSequencerInboxImpl;
 
-    constructor(
-        address _newSequencerInboxImpl
-    ) {
+    constructor(address _newSequencerInboxImpl) {
         require(Address.isContract(_newSequencerInboxImpl), "_newSequencerInboxImpl is not a contract");
         newSequencerInboxImpl = _newSequencerInboxImpl;
     }
@@ -28,9 +26,7 @@ contract EspressoSequencerInboxMigrationAction {
         TransparentUpgradeableProxy sequencerInbox =
             TransparentUpgradeableProxy(payable(address(rollup.sequencerInbox())));
         (, uint256 futureBlocksBefore,,) = ISequencerInbox(address(sequencerInbox)).maxTimeVariation();
-        proxyAdmin.upgrade(
-            sequencerInbox, newSequencerInboxImpl
-        );
+        proxyAdmin.upgrade(sequencerInbox, newSequencerInboxImpl);
 
         // verify
         require(
@@ -39,6 +35,5 @@ contract EspressoSequencerInboxMigrationAction {
         );
         (, uint256 futureBlocksAfter,,) = ISequencerInbox(address(sequencerInbox)).maxTimeVariation();
         require(futureBlocksBefore != 0 && futureBlocksBefore == futureBlocksAfter, "maxTimeVariation not set");
-
     }
 }
