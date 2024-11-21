@@ -8,3 +8,7 @@
 	path = lib/nitro-contracts
   url = https://github.com/EspressoSystems/nitro-contracts
   branch = celestia-integration
+[submodule "lib/nitro-contracts"]
+	path = lib/nitro-contracts
+	url = https://github.com/EspressoSystems/nitro-contracts
+	branch = celestia-integration
