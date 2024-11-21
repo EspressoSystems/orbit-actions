@@ -23,9 +23,9 @@ import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier
 contract MigrationTest is Test {
     IReader4844 dummyReader4844 = IReader4844(address(137));
     address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true));
-
     RollupCreator public rollupCreator; // save the rollup creators address for bindings in the test.
     address public rollupAddress; // save the rollup address for bindings in the test.
+    address public proxyAdminAddr; // save the proxy admin addr for building contracts in the test.
     address public rollupOwner = makeAddr("rollupOwner");
     address public deployer = makeAddr("deployer");
     IRollupAdmin public rollupAdmin;
@@ -166,18 +166,20 @@ contract MigrationTest is Test {
     function test_migrateToEspresso() public {
         //begin by seting pre-requisites in the vm so the test can get the data it needs.
         IRollupCore rollup = IRollupCore(rollupAddress);
-
+        
         address upgradeExecutorExpectedAddress = computeCreateAddress(address(rollupCreator), 4);
         //ensure we have the correct address for the proxy admin
         ProxyAdmin admin = ProxyAdmin(_getProxyAdmin(address(rollup.sequencerInbox())));
+        address adminAddr = _getProxyAdmin(address(rollup.sequencerInbox()));
+       
         assertEq(admin.owner(), upgradeExecutorExpectedAddress, "Invalid proxyAdmin's owner");
 
         IUpgradeExecutor _upgradeExecutor = IUpgradeExecutor(upgradeExecutorExpectedAddress);
 
         bytes memory data =
-            abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector, rollup, admin);
+            abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector);
 
-        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress));
+        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr));
 
         vm.prank(rollupOwner);
         _upgradeExecutor.execute(migration, data);
