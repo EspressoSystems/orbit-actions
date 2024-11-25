@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 import "nitro-contracts/bridge/ISequencerInbox.sol";
+import "nitro-contracts/bridge/SequencerInbox.sol";
 import "nitro-contracts/bridge/IBridge.sol";
 import "nitro-contracts/bridge/IInbox.sol";
 import "nitro-contracts/bridge/IOutbox.sol";
@@ -22,14 +23,26 @@ contract EspressoSequencerInboxMigrationAction {
     address public immutable newSequencerInboxImpl;
     address public immutable rollup;
     address public immutable proxyAdminAddr;
+    address public immutable espressoTEEVerifier;
+    address public immutable oldBatchPosterAddr;
+    address public immutable newBatchPosterAddr;
+    address public immutable batchPosterManager;
 
     error AddressIsNotContract(address incorrectAddr);
 
+    error OldBatchPosterMustNotBeZeroAddr();
+
+    error NewBatchPosterMustNotBeZeroAddr();
+    
+    error BatchPosterManagerMustNotBeZeroAddr();
+    
     error MaxTimeVariationNotSet();
 
     error SequencerInboxNotUpgraded(address oldSequencerInboxAddr);
+    
+    error espressoTEEVerifierNotSet();
 
-    constructor(address _newSequencerInboxImpl, address _rollup, address _proxyAdminAddr) {
+    constructor(address _newSequencerInboxImpl, address _rollup, address _proxyAdminAddr, address _espressoTEEVerifier, address _oldBatchPosterAddr, address _newBatchPosterAddr, address _batchPosterManager) {
         // If the new impl addresses are contracts, we need to revert
         if (!Address.isContract(_newSequencerInboxImpl)) {
             revert AddressIsNotContract(_newSequencerInboxImpl);
@@ -43,21 +56,46 @@ contract EspressoSequencerInboxMigrationAction {
             revert AddressIsNotContract(_proxyAdminAddr);
         }
 
+        if (!Address.isContract(_espressoTEEVerifier)){
+            revert AddressIsNotContract(_espressoTEEVerifier);
+        }
+
+        if (_oldBatchPosterAddr == address(0x0)){
+            revert OldBatchPosterMustNotBeZeroAddr();
+        }
+        
+        if (_newBatchPosterAddr == address(0x0)){
+            revert NewBatchPosterMustNotBeZeroAddr();
+        }
+
+        if (_batchPosterManager == address(0x0)){
+            revert BatchPosterManagerMustNotBeZeroAddr();
+        }
+
         newSequencerInboxImpl = _newSequencerInboxImpl;
 
         rollup = _rollup;
 
         proxyAdminAddr = _proxyAdminAddr;
+
+        espressoTEEVerifier = _espressoTEEVerifier;
+
+        oldBatchPosterAddr = _oldBatchPosterAddr;
+
+        newBatchPosterAddr = _newBatchPosterAddr;
+
+        batchPosterManager = _batchPosterManager;
+    
     }
 
     function perform() public {
         // set up contracts we need to interact with.
         IRollupCore rollupCore = IRollupCore(rollup);
         ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddr);
+
         TransparentUpgradeableProxy sequencerInbox =
             TransparentUpgradeableProxy(payable(address(rollupCore.sequencerInbox())));
-        // Get future blocks value to create assertion at end of migration
-        (, uint256 futureBlocksBefore,,) = ISequencerInbox(address(sequencerInbox)).maxTimeVariation();
+        
         // migrate the rollup to the new sequencer inbox
         proxyAdmin.upgrade(sequencerInbox, newSequencerInboxImpl);
 
@@ -66,12 +104,21 @@ contract EspressoSequencerInboxMigrationAction {
         if (proxyImpl != newSequencerInboxImpl) {
             revert SequencerInboxNotUpgraded(proxyImpl);
         }
+       
+        SequencerInbox proxyInbox = SequencerInbox(address(rollupCore.sequencerInbox()));
+        // Set the TEE verifier address
+        proxyInbox.setEspressoTEEVerifier(espressoTEEVerifier);
+        // Remove the permissions for the old batch poster addresses
+        proxyInbox.setIsBatchPoster(oldBatchPosterAddr, false);
+        // Whitelist the new batch posters address to enable it to post batches 
+        proxyInbox.setIsBatchPoster(newBatchPosterAddr, true);
+        // Set the batch poster manager.
+        proxyInbox.setBatchPosterManager(batchPosterManager);
 
-        (, uint256 futureBlocksAfter,,) = ISequencerInbox(address(sequencerInbox)).maxTimeVariation();
 
-        // if the max time variation was not set, the sequencer inbox is not initialized, we need to revert.
-        if (futureBlocksBefore == 0 || futureBlocksBefore != futureBlocksAfter) {
-            revert MaxTimeVariationNotSet();
+        address proxyTEEVerifierAddr = address(proxyInbox.espressoTEEVerifier());
+        if (proxyTEEVerifierAddr != espressoTEEVerifier) {
+            revert espressoTEEVerifierNotSet(); 
         }
     }
 }

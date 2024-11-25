@@ -23,6 +23,10 @@ import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier
 contract MigrationTest is Test {
     IReader4844 dummyReader4844 = IReader4844(address(137));
     address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true));
+    address mockTEEVerifier = address(new EspressoTEEVerifierMock());
+    address oldBatchPosterAddr = address(0x01112);
+    address newBatchPosterAddr = address(0x01113);
+    address batchPosterManagerAddr = address(0x01114);
     RollupCreator public rollupCreator; // save the rollup creators address for bindings in the test.
     address public rollupAddress; // save the rollup address for bindings in the test.
     address public proxyAdminAddr; // save the proxy admin addr for building contracts in the test.
@@ -179,18 +183,21 @@ contract MigrationTest is Test {
         bytes memory data =
             abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector);
 
-        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr));
+        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr, mockTEEVerifier, oldBatchPosterAddr, newBatchPosterAddr, batchPosterManagerAddr));
 
         vm.prank(rollupOwner);
         _upgradeExecutor.execute(migration, data);
         vm.stopPrank();
-
         assertEq(
             address(
                 admin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rollup.sequencerInbox()))))
             ),
             address(newSequencerImplAddress),
             "Sequencer Inbox has not been updated"
+        );
+        SequencerInbox proxyInbox = SequencerInbox(address(rollup.sequencerInbox()));
+        assertEq(
+          mockTEEVerifier, address(proxyInbox.espressoTEEVerifier())
         );
     }
 }
