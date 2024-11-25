@@ -1,63 +1,42 @@
-// SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "@arbitrum/nitro-contracts/src/challenge/IChallengeManager.sol";
-import "@arbitrum/nitro-contracts/src/challenge/ChallengeManager.sol";
-import "@arbitrum/nitro-contracts/src/osp/OneStepProver0.sol";
-import "@arbitrum/nitro-contracts/src/osp/OneStepProverMemory.sol";
-import "@arbitrum/nitro-contracts/src/osp/OneStepProverMath.sol";
-import "@arbitrum/nitro-contracts/src/osp/OneStepProverHostIo.sol";
-import "@arbitrum/nitro-contracts/src/osp/OneStepProofEntry.sol";
-import "@arbitrum/nitro-contracts/src/mocks/UpgradeExecutorMock.sol";
-import "@arbitrum/nitro-contracts/src/rollup/RollupCore.sol";
-import "@arbitrum/nitro-contracts/src/rollup/RollupCreator.sol";
-import "@arbitrum/nitro-contracts/src/rollup/RollupAdminLogic.sol";
-import "@arbitrum/nitro-contracts/src/rollup/RollupUserLogic.sol";
-import "@arbitrum/nitro-contracts/src/rollup/ValidatorUtils.sol";
-import "@arbitrum/nitro-contracts/src/rollup/ValidatorWalletCreator.sol";
+import "nitro-contracts/challenge/IChallengeManager.sol";
+import "nitro-contracts/challenge/ChallengeManager.sol";
+import "nitro-contracts/osp/OneStepProver0.sol";
+import "nitro-contracts/osp/OneStepProverMemory.sol";
+import "nitro-contracts/osp/OneStepProverMath.sol";
+import "nitro-contracts/osp/OneStepProverHostIo.sol";
+import "nitro-contracts/osp/OneStepProofEntry.sol";
+import "nitro-contracts/mocks/UpgradeExecutorMock.sol";
+import "nitro-contracts/rollup/RollupCore.sol";
+import "nitro-contracts/rollup/RollupCreator.sol";
+import "nitro-contracts/rollup/RollupAdminLogic.sol";
+import "nitro-contracts/rollup/RollupUserLogic.sol";
+import "nitro-contracts/rollup/ValidatorUtils.sol";
+import "nitro-contracts/rollup/ValidatorWalletCreator.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import "../parent-chain/espresso-migration/EspressoOspMigrationAction.sol";
-
-contract EspressoOspMigrationAction is OspMigrationAction, Script {
-    constructor()
-        OspMigrationAction(
-            address(0xBD110dAd17e1d4e6A629407474c9Ea4bbdEFa338),
-            bytes32(0x2422802a7cda99737209430b103689205bc8e56eab8b08c6ad409e65e45c3145),
-            address(0x9C2eD9F57D053FDfAEcBF1B6Dfd7C97e2e340B84),
-            bytes32(0xbc1026ff45c20ea97e9e6057224a5668ea78d8f885c9b14fc849238e8ef5c5dc),
-            address(0x3cf538A94538a25ee3bcA0287aB530ACCf9Dbaf6),
-            address(0x2A1f38c9097e7883570e0b02BFBE6869Cc25d8a3)
-        )
-    {}
-}
-
-contract MockHotShot {
-    mapping(uint256 => uint256) public commitments;
-
-    function setCommitment(uint256 height, uint256 commitment) external {
-        commitments[height] = commitment;
-    }
-}
+import "../parent-chain/espresso-migration/EspressoSequencerInboxMigrationAction.sol";
+import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier.sol";
 
 contract MigrationTest is Test {
+    IReader4844 dummyReader4844 = IReader4844(address(137));
+    address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true));
+    address mockTEEVerifier = address(new EspressoTEEVerifierMock());
+    address oldBatchPosterAddr = address(0x01112);
+    address newBatchPosterAddr = address(0x01113);
+    address batchPosterManagerAddr = address(0x01114);
     RollupCreator public rollupCreator; // save the rollup creators address for bindings in the test.
     address public rollupAddress; // save the rollup address for bindings in the test.
+    address public proxyAdminAddr; // save the proxy admin addr for building contracts in the test.
     address public rollupOwner = makeAddr("rollupOwner");
     address public deployer = makeAddr("deployer");
     IRollupAdmin public rollupAdmin;
     IRollupUser public rollupUser;
     DeployHelper public deployHelper;
-    IReader4844 dummyReader4844 = IReader4844(address(137));
-    MockHotShot public hotshot = new MockHotShot();
-    IUpgradeExecutor upgradeExecutor;
 
-    IOneStepProofEntry originalOspEntry;
-    IOneStepProofEntry newOspEntry = IOneStepProofEntry(
-        new OneStepProofEntry(
-            new OneStepProver0(), new OneStepProverMemory(), new OneStepProverMath(), new OneStepProverHostIo()
-        )
-    );
+    IUpgradeExecutor upgradeExecutor;
 
     uint256 public constant MAX_FEE_PER_GAS = 1_000_000_000;
     uint256 public constant MAX_DATA_SIZE = 117_964;
@@ -85,10 +64,6 @@ contract MigrationTest is Test {
         rollupCreator = new RollupCreator();
         deployHelper = new DeployHelper();
 
-        for (uint256 i = 1; i < 10; i++) {
-            hotshot.setCommitment(uint256(i), uint256(i));
-        }
-
         // deploy BridgeCreators
         BridgeCreator bridgeCreator = new BridgeCreator(ethBasedTemplates, erc20BasedTemplates);
 
@@ -101,8 +76,6 @@ contract MigrationTest is Test {
             IRollupAdmin _rollupAdmin,
             IRollupUser _rollupUser
         ) = _prepareRollupDeployment();
-
-        originalOspEntry = ospEntry;
 
         rollupAdmin = _rollupAdmin;
         rollupUser = _rollupUser;
@@ -120,6 +93,8 @@ contract MigrationTest is Test {
             deployHelper
         );
 
+        EspressoTEEVerifierMock espressoTEEVerifier = new EspressoTEEVerifierMock();
+
         // deployment params
         ISequencerInbox.MaxTimeVariation memory timeVars =
             ISequencerInbox.MaxTimeVariation(((60 * 60 * 24) / 15), 12, 60 * 60 * 24, 60 * 60);
@@ -134,7 +109,8 @@ contract MigrationTest is Test {
             chainId: 1337,
             chainConfig: "abc",
             genesisBlockNum: 15_000_000,
-            sequencerInboxMaxTimeVariation: timeVars
+            sequencerInboxMaxTimeVariation: timeVars,
+            espressoTEEVerifier: address(espressoTEEVerifier)
         });
 
         // prepare funds
@@ -194,45 +170,34 @@ contract MigrationTest is Test {
     function test_migrateToEspresso() public {
         //begin by seting pre-requisites in the vm so the test can get the data it needs.
         IRollupCore rollup = IRollupCore(rollupAddress);
-
+        
         address upgradeExecutorExpectedAddress = computeCreateAddress(address(rollupCreator), 4);
         //ensure we have the correct address for the proxy admin
-        assertEq(
-            ProxyAdmin(_getProxyAdmin(address(rollup.sequencerInbox()))).owner(),
-            upgradeExecutorExpectedAddress,
-            "Invalid proxyAdmin's owner"
-        );
+        ProxyAdmin admin = ProxyAdmin(_getProxyAdmin(address(rollup.sequencerInbox())));
+        address adminAddr = _getProxyAdmin(address(rollup.sequencerInbox()));
+       
+        assertEq(admin.owner(), upgradeExecutorExpectedAddress, "Invalid proxyAdmin's owner");
 
         IUpgradeExecutor _upgradeExecutor = IUpgradeExecutor(upgradeExecutorExpectedAddress);
 
-        vm.setEnv("NEW_OSP_ENTRY", Strings.toHexString(uint256(uint160(address(newOspEntry)))));
-        vm.setEnv("CURRENT_OSP_ENTRY", Strings.toHexString(uint256(uint160(address(originalOspEntry)))));
-        vm.setEnv("ROLLUP_ADDRESS", Strings.toHexString(uint256(uint160(address(rollupAddress)))));
-        vm.setEnv("PROXY_ADMIN", Strings.toHexString(uint256(uint160(computeCreateAddress(address(rollupCreator), 1)))));
-        vm.setEnv("NEW_WASM_MODULE_ROOT", Strings.toHexString(uint256(keccak256("newRoot"))));
-        vm.setEnv("CURRENT_WASM_MODULE_ROOT", Strings.toHexString(uint256(keccak256("wasm"))));
-        bytes memory data = abi.encodeWithSelector(OspMigrationAction.perform.selector);
+        bytes memory data =
+            abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector);
 
-        address migration = address(new EspressoOspMigrationAction());
+        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr, mockTEEVerifier, oldBatchPosterAddr, newBatchPosterAddr, batchPosterManagerAddr));
 
         vm.prank(rollupOwner);
         _upgradeExecutor.execute(migration, data);
         vm.stopPrank();
-
         assertEq(
-            address(rollup.challengeManager().getOsp(bytes32(uint256(keccak256("wasm"))))),
-            address(originalOspEntry),
-            "CondOsp at original root is not what was expected."
+            address(
+                admin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rollup.sequencerInbox()))))
+            ),
+            address(newSequencerImplAddress),
+            "Sequencer Inbox has not been updated"
         );
+        SequencerInbox proxyInbox = SequencerInbox(address(rollup.sequencerInbox()));
         assertEq(
-            address(rollup.challengeManager().getOsp(bytes32(uint256(keccak256("newRoot"))))),
-            address(newOspEntry),
-            "CondOsp at new root is not what was expected."
-        );
-        assertEq(
-            rollup.wasmModuleRoot(),
-            bytes32(uint256(keccak256("newRoot"))),
-            "Rollup's wasmModuleRoot was not changed by migration"
+          mockTEEVerifier, address(proxyInbox.espressoTEEVerifier())
         );
     }
 }
