@@ -16,9 +16,16 @@ remappings = [
 ]
 test = 'test'
 cache_path  = 'cache_forge'
-solc_version = '0.8.22'
+solc_version = '0.8.16'
 optimizer = true
 optimizer_runs = 2000
 via_ir = true
 fs_permissions = [{ access = "read", path = "node_modules/@arbitrum/nitro-contracts-1.2.1"}, { access = "read-write", path = "./scripts/foundry"}]
 script = 'scripts'
+[profile.yul]
+src = 'yul'
+out = 'out/yul'
+libs = ['node_modules', 'lib']
+cache_path  = 'forge-cache/yul'
+remappings = []
+auto_detect_remappings = false

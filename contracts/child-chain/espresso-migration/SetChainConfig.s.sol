@@ -14,17 +14,15 @@ import "nitro-contracts/precompiles/ArbOwner.sol";
 contract SetEspressoChainConfig is Script {
     function run() external {
         // Grab addresses from env
-        address childChainUpgradeExecutorAddr = vm.envAddress("CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS");
         address arbOwnerAddr = address(0x070);
-        address espressoTeeVerifierAddr = vm.envAddress("ESPRESSO_TEE_VERIFIER_ADDRESS");
+        
         string memory chainConfig = vm.envString("CHAIN_CONFIG");
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-       
-        IUpgradeExecutor upgradeExecutor = IUpgradeExecutor(childChainUpgradeExecutorAddr);
+
         // Start broadcast to deploy and initializer the SequencerInbox
         vm.startBroadcast(deployerPrivateKey);
-        bytes memory setChainConfigParams = abi.encodeCall(ArbOwner.setChainConfig, chainConfig);
-        upgradeExecutor.executeCall(arbOwnerAddr, setChainConfigParams);
+        ArbOwner arbOwner = ArbOwner(arbOwnerAddr);
+        arbOwner.setChainConfig(chainConfig);
         vm.stopBroadcast();
     }
 }
