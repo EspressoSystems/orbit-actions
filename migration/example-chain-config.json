@@ -24,6 +24,6 @@
         "InitialArbOSVersion":30,
         "InitialChainOwner":"0x0000000000000000000000000000000000000000",
         "GenesisBlockNum":0,
-        "EnableEspresso":true
+        "EspressoTEEVerifierAddress":"0x0000000000000000000000000000000000000000"
     }
 }
