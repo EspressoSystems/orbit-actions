@@ -170,7 +170,7 @@ contract MigrationTest is Test {
     function test_migrateToEspresso() public {
         //begin by seting pre-requisites in the vm so the test can get the data it needs.
         IRollupCore rollup = IRollupCore(rollupAddress);
-
+        
         address upgradeExecutorExpectedAddress = computeCreateAddress(address(rollupCreator), 4);
         //ensure we have the correct address for the proxy admin
         ProxyAdmin admin = ProxyAdmin(_getProxyAdmin(address(rollup.sequencerInbox())));
