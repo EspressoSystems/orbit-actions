@@ -19,7 +19,9 @@ contract DeployAndInitEspressoSequencerInbox is Script {
         uint256 maxDataSize = vm.envUint("MAX_DATA_SIZE");
         // Grab booleans we need from env
         bool isUsingFeeToken = vm.envBool("IS_USING_FEE_TOKEN");
-
+        // Trick the Vm into seeing that this opcode exsists and 
+        bytes memory code = vm.getDeployedCode("ArbSysMock.sol:ArbSysMock");
+        vm.etch(0x0000000000000000000000000000000000000064, code);
         // initialize interfaces needed
         IReader4844 reader = IReader4844(reader4844Addr);
         // Start broadcast to deploy the SequencerInbox
