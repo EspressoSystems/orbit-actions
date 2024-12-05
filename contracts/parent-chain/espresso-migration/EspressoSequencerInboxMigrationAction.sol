@@ -34,8 +34,6 @@ contract EspressoSequencerInboxMigrationAction {
 
     error NewBatchPosterMustNotBeZeroAddr();
     
-    error BatchPosterManagerMustNotBeZeroAddr();
-    
     error MaxTimeVariationNotSet();
 
     error SequencerInboxNotUpgraded(address oldSequencerInboxAddr);
@@ -66,10 +64,6 @@ contract EspressoSequencerInboxMigrationAction {
         
         if (_newBatchPosterAddr == address(0x0)){
             revert NewBatchPosterMustNotBeZeroAddr();
-        }
-
-        if (_batchPosterManager == address(0x0)){
-            revert BatchPosterManagerMustNotBeZeroAddr();
         }
 
         newSequencerInboxImpl = _newSequencerInboxImpl;
@@ -113,8 +107,9 @@ contract EspressoSequencerInboxMigrationAction {
         // Whitelist the new batch posters address to enable it to post batches 
         proxyInbox.setIsBatchPoster(newBatchPosterAddr, true);
         // Set the batch poster manager.
-        proxyInbox.setBatchPosterManager(batchPosterManager);
-
+        if (batchPosterManager != address(0x0)){
+          proxyInbox.setBatchPosterManager(batchPosterManager);
+        }
 
         address proxyTEEVerifierAddr = address(proxyInbox.espressoTEEVerifier());
         if (proxyTEEVerifierAddr != espressoTEEVerifier) {
