@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import "forge-std/Script.sol";
 import {IReader4844} from "@arbitrum/nitro-contracts-1.2.1/src/libraries/IReader4844.sol";
