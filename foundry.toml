@@ -10,13 +10,14 @@ remappings = [
 "eth-gas-reporter/=node_modules/eth-gas-reporter/",
 "forge-std/=lib/forge-std/src/",
 "hardhat/=node_modules/hardhat/",
-"solady/=node_modules/solady/",
-"@openzeppelin/contracts-upgradeable/=/node_modules/@openzeppelin/contracts-upgradeable/",
-"@openzeppelin/contracts/=/node_modules/@openzeppelin/contracts/",
+"solady/=node_modules/solady/src",
+"@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+"@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
 ]
 test = 'test'
 cache_path  = 'cache_forge'
-solc_version = '0.8.16'
+solc_version = '0.8.22'
 optimizer_runs = 2000
 fs_permissions = [{ access = "read", path = "node_modules/@arbitrum/"}, { access = "read", path = "node_modules/@openzeppelin/"},{ access = "read-write", path = "./scripts/foundry"}]
 script = 'scripts'
+via-ir = true
