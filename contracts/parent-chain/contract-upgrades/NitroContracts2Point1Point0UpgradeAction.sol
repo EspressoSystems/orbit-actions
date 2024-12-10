@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import "@arbitrum/nitro-contracts-2.1.0/src/osp/IOneStepProofEntry.sol";
 import "@arbitrum/nitro-contracts-2.1.0/src/rollup/IRollupAdmin.sol";
