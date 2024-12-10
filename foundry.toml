@@ -20,3 +20,4 @@ solc_version = '0.8.22'
 optimizer_runs = 2000
 fs_permissions = [{ access = "read", path = "node_modules/@arbitrum/"}, { access = "read", path = "node_modules/@openzeppelin/"},{ access = "read-write", path = "./scripts/foundry"}]
 script = 'scripts'
+via-ir = true
