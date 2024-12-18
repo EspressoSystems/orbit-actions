@@ -5,6 +5,7 @@
   "license": "Apache 2.0",
   "scripts": {
     "prepare": "forge install && cd lib/arbitrum-sdk && yarn",
+    "prepare:contracts": "cd lib/nitro-contracts && yarn install && yarn build",
     "minimal-publish": "./scripts/publish.bash",
     "minimal-install": "yarn --ignore-scripts && forge install",
     "audit:ci": "audit-ci --config ./audit-ci.jsonc",
