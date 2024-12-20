@@ -43,8 +43,6 @@ The following information is necessary for the migration:
     
     - PROXY_ADMIN_ADDRESS: The address of the proxy admin for your rollup on the parent chain.
 
-    - UPGRADE_TIMESTAMP: The unix timestamp you wish to perform the ArbOS upgrade at.
-    
     - READER_ADDRESS: The address of a 4844 blob reader contract. This is relevant if the parent chain in your deployment    is not an arbitrum chain. If it is an arbitrum chain, this can be set to the zero address.
 
     - IS_USING_FEE_TOKEN: A boolean representing if this chaing is using a fee token, This is important for constructing    the sequencer inbox, and shouldn't be deviated from your current deployment.
@@ -148,27 +146,6 @@ On the parent chain you need to call the `perform()` function on the EspressoArb
 ```
 cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" $ARBOS_UPGRADE_ACTION $(cast calldata "perform()") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
 ```
-
-## Enabling Espresso batch poster behavior
-
-To enable the behavior in the batch poster that provides compatibility with the Espresso network, you must send a request (via cast) to the `ArbOwner` precompile to update your networks chain config.
-
-There is an example chain config json file in the same directory as this README to show which fields need to be added to the standard Arbitrum chain config.
-
-Ensure that values other than the new EspressoTEEVerifierAddress are the same values as they are in your current chain config
-It is **incredibly important** that the node with espresso compatible code is loaded with a chain config that contains the `EspressoTEEVerifierAddress` field inside the arbitrum chain parameters set to the zero address. If the config doesn't contain this flag, attempting to set the chain config in the following manner will cause the delegated call from the `UpgradeExecutor` to revert.
-
-The request to the ArbOwner precompile must come from an address designated as a chain owner. Typically this is the `UpgradeExecutor`.
-
-The following command uses cast and the `UpgradeExecutor` to send the new chain config to the network.
-
-Note: The address 0x0000000000000000000000000000000000000070 is the hard-coded address of the ArbOwner precompile on arbitrum derived chains.
-
-
-```
-cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "executeCall(address, bytes)" 0x0000000000000000000000000000000000000070 $(cast calldata "setChainConfig(string)" "$(cat /chain/config/location)") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
-```
-
 
 ## 4. Useful commands
 
