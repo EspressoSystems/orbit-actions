@@ -27,6 +27,7 @@ contract EspressoSequencerInboxMigrationAction {
     address public immutable oldBatchPosterAddr;
     address public immutable newBatchPosterAddr;
     address public immutable batchPosterManager;
+    address public immutable isRevert;
 
     error AddressIsNotContract(address incorrectAddr);
 
@@ -40,7 +41,7 @@ contract EspressoSequencerInboxMigrationAction {
     
     error espressoTEEVerifierNotSet();
 
-    constructor(address _newSequencerInboxImpl, address _rollup, address _proxyAdminAddr, address _espressoTEEVerifier, address _oldBatchPosterAddr, address _newBatchPosterAddr, address _batchPosterManager) {
+    constructor(address _newSequencerInboxImpl, address _rollup, address _proxyAdminAddr, address _espressoTEEVerifier, address _oldBatchPosterAddr, address _newBatchPosterAddr, address _batchPosterManager, bool _isRevert) {
         // If the new impl addresses are contracts, we need to revert
         if (!Address.isContract(_newSequencerInboxImpl)) {
             revert AddressIsNotContract(_newSequencerInboxImpl);
@@ -79,6 +80,8 @@ contract EspressoSequencerInboxMigrationAction {
         newBatchPosterAddr = _newBatchPosterAddr;
 
         batchPosterManager = _batchPosterManager;
+
+        isRevert = _isRevert;
     
     }
 
@@ -101,7 +104,9 @@ contract EspressoSequencerInboxMigrationAction {
        
         SequencerInbox proxyInbox = SequencerInbox(address(rollupCore.sequencerInbox()));
         // Set the TEE verifier address
-        proxyInbox.setEspressoTEEVerifier(espressoTEEVerifier);
+        if (!isRevert){
+          proxyInbox.setEspressoTEEVerifier(espressoTEEVerifier);
+        }
         // Remove the permissions for the old batch poster addresses
         proxyInbox.setIsBatchPoster(oldBatchPosterAddr, false);
         // Whitelist the new batch posters address to enable it to post batches 
@@ -112,7 +117,7 @@ contract EspressoSequencerInboxMigrationAction {
         }
 
         address proxyTEEVerifierAddr = address(proxyInbox.espressoTEEVerifier());
-        if (proxyTEEVerifierAddr != espressoTEEVerifier) {
+        if (!isRevert && (proxyTEEVerifierAddr != espressoTEEVerifier)) {
             revert espressoTEEVerifierNotSet(); 
         }
     }
