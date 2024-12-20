@@ -175,3 +175,5 @@ This will require using a specific contract present in the orbit-actions repo: S
 This custom sequencerInbox.sol contracts is a version of the sequencer inbox contract that has the same functionality as the original sequencer inbox, but is compatible with the new storage slot layout.
 Deploying this sequencer inbox contract and deploying a new migration action with the env var `IS_REVERT` set to true will set up the revert migration action.
 This action can be performed via the upgrade executor to revert the rollup to it's previous behavior as needed.
+
+In order to properly deploy the revert migration action, you should temporarily replace the SequencerInbox.sol contract in lib/nitro-contracts/src/bridge with this contract. That will allow the DeployAndInitEspressoSequencerInbox.s.sol script in this repo to deploy this version of the contract.
