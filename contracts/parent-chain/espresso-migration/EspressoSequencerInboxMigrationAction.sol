@@ -27,7 +27,7 @@ contract EspressoSequencerInboxMigrationAction {
     address public immutable oldBatchPosterAddr;
     address public immutable newBatchPosterAddr;
     address public immutable batchPosterManager;
-    address public immutable isRevert;
+    bool public immutable isRevert;
 
     error AddressIsNotContract(address incorrectAddr);
 
