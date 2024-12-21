@@ -183,7 +183,7 @@ contract MigrationTest is Test {
         bytes memory data =
             abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector);
 
-        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr, mockTEEVerifier, oldBatchPosterAddr, newBatchPosterAddr, batchPosterManagerAddr));
+        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr, mockTEEVerifier, oldBatchPosterAddr, newBatchPosterAddr, batchPosterManagerAddr, false));
 
         vm.prank(rollupOwner);
         _upgradeExecutor.execute(migration, data);
