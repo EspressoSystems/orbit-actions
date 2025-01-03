@@ -12,6 +12,7 @@ const config: HardhatUserConfig = {
   solidity: getSolidityConfigFromFoundryToml(
     process.env.FOUNDRY_PROFILE || 'default'
   ),
+
   networks: {
     fork: {
       url: process.env.FORK_URL || 'http://localhost:8545',
@@ -46,6 +47,7 @@ function getSolidityConfigFromFoundryToml(profile: string): SolidityUserConfig {
   const solidity = {
     version: profileConfig?.solc_version || defaultConfig.solc_version,
     settings: {
+      viaIR: true,
       optimizer: {
         enabled: true,
         runs: profileConfig?.optimizer_runs || defaultConfig.optimizer_runs,
