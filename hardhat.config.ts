@@ -52,7 +52,6 @@ function getSolidityConfigFromFoundryToml(profile: string): SolidityUserConfig {
         enabled: true,
         runs: profileConfig?.optimizer_runs || defaultConfig.optimizer_runs,
       },
-      viaIR: true,
     },
   }
 
