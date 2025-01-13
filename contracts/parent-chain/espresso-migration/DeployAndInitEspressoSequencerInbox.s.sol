@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT 
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "forge-std/Script.sol";
@@ -19,7 +19,7 @@ contract DeployAndInitEspressoSequencerInbox is Script {
         uint256 maxDataSize = vm.envUint("MAX_DATA_SIZE");
         // Grab booleans we need from env
         bool isUsingFeeToken = vm.envBool("IS_USING_FEE_TOKEN");
-        // Trick the Vm into seeing that this opcode exsists and 
+        // Trick the Vm into seeing that this opcode exsists and
         bytes memory code = vm.getDeployedCode("ArbSysMock.sol:ArbSysMock");
         vm.etch(0x0000000000000000000000000000000000000064, code);
         // initialize interfaces needed
@@ -27,7 +27,7 @@ contract DeployAndInitEspressoSequencerInbox is Script {
         // Start broadcast to deploy the SequencerInbox
         vm.startBroadcast(deployerPrivateKey);
         SequencerInbox sequencerInbox = new SequencerInbox(maxDataSize, reader, isUsingFeeToken);
-        
+
         // Setting batch posters and batch poster manager
         vm.stopBroadcast();
     }

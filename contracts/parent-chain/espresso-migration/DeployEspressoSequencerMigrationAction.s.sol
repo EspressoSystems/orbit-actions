@@ -19,10 +19,18 @@ contract DeployEspressoSequencerMigrationAction is Script {
         address oldBatchPosterAddr = vm.envAddress("OLD_BATCH_POSTER_ADDRESS");
         address newBatchPosterAddr = vm.envAddress("NEW_BATCH_POSTER_ADDRESS");
         address batchPosterManagerAddr = vm.envAddress("BATCH_POSTER_MANAGER_ADDRESS");
-        bool    isRevert = vm.envBool("IS_REVERT");
+        bool isRevert = vm.envBool("IS_REVERT");
         vm.startBroadcast(deployerPrivateKey);
-        EspressoSequencerInboxMigrationAction migrationAction =
-            new EspressoSequencerInboxMigrationAction(newSequencerInboxImplAddr, rollupAddr, proxyAdminAddr, espressoTeeVerifierAddr, oldBatchPosterAddr, newBatchPosterAddr, batchPosterManagerAddr, isRevert);
+        EspressoSequencerInboxMigrationAction migrationAction = new EspressoSequencerInboxMigrationAction(
+            newSequencerInboxImplAddr,
+            rollupAddr,
+            proxyAdminAddr,
+            espressoTeeVerifierAddr,
+            oldBatchPosterAddr,
+            newBatchPosterAddr,
+            batchPosterManagerAddr,
+            isRevert
+        );
         vm.stopBroadcast();
     }
 }
