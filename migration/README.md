@@ -6,11 +6,7 @@ It will provide step by step instructions that will walk you through the migrati
 ### Table of contents:
     1. Pre-requisites
     2. Contract deployments
-        2a.Parent chain deployments
-        2b.Child chain deployments
     3. Contract execution
-        3a. Parent chain execution
-        3b. Child chain execution
     4. Useful commands
     5. Reverting
 
@@ -74,9 +70,7 @@ This leads to forge seeing a revert in the scripts execution that would not occu
 
 ## 2. Contract Deployments
 
-### Parent chain deployments
-
-The parent chain is where most of the contract deployments will happen for the migration to espresso. There are two forge scripts that you need to deploy on the parent chain. These scripts are located in the following directories:
+There are two forge scripts that you need to deploy on the parent chain. These scripts are located in the following directories:
 
 [orbit-actions/contracts/parent-chain/espresso-migration/DeployAndInitEspressoSequencerInbox.s.sol](../contracts/parent-chain/espresso-migration/DeployAndInitEspressoSequencerInbox.s.sol)
 
@@ -129,22 +123,12 @@ Similarly to the SequencerInbox implementation deployment, you should record the
 
 ## 3. Contract execution
 
-Two of the contracts deployed in the previous steps require additional steps to execute them on the parent a child chains for your rollup. 
-
-### Parent chain contract execution
+The contract deployed in the previous step requires an additional step to execute it on the parent chain for your rollup. 
 
 On the parent chain you need to call the `perform()` function on the EspressoOspMigrationAction contract with the following command:
 
 ```
 cast send $PARENT_CHAIN_UPGRADE_EXECUTOR "execute(address, bytes)" $SEQUENCER_MIGRATION_ACTION $(cast calldata "perform()") --rpc-url $PARENT_CHAIN_RPC_URL --private-key $PRIVATE_KEY
-```
-
-### Child chain contract execution
-
-On the parent chain you need to call the `perform()` function on the EspressoArbOSUpgrade contract with the following command:
-
-```
-cast send $CHILD_CHAIN_UPGRADE_EXECUTOR_ADDRESS "execute(address, bytes)" $ARBOS_UPGRADE_ACTION $(cast calldata "perform()") --rpc-url $CHILD_CHAIN_RPC_URL --private-key $PRIVATE_KEY
 ```
 
 ## 4. Useful commands
