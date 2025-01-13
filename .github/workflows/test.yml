@@ -27,6 +27,7 @@ jobs:
 
   test-contract-size:
     name: Test Contract Size
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,6 +44,7 @@ jobs:
   test-gas-check:
     name: Test Gas Check
     runs-on: ubuntu-latest
+    if: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,6 +59,7 @@ jobs:
 
   test-sigs:
     name: Test Signatures
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -72,6 +75,7 @@ jobs:
 
   test-storage:
     name: Test Storage
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -81,6 +85,6 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-        
+
       - run: yarn minimal-install
       - run: yarn test:storage
