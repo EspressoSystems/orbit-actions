@@ -27,20 +27,30 @@ contract EspressoSequencerInboxMigrationAction {
     address public immutable oldBatchPosterAddr;
     address public immutable newBatchPosterAddr;
     address public immutable batchPosterManager;
+    bool public immutable isRevert;
 
     error AddressIsNotContract(address incorrectAddr);
 
     error OldBatchPosterMustNotBeZeroAddr();
 
     error NewBatchPosterMustNotBeZeroAddr();
-    
+
     error MaxTimeVariationNotSet();
 
     error SequencerInboxNotUpgraded(address oldSequencerInboxAddr);
-    
+
     error espressoTEEVerifierNotSet();
 
-    constructor(address _newSequencerInboxImpl, address _rollup, address _proxyAdminAddr, address _espressoTEEVerifier, address _oldBatchPosterAddr, address _newBatchPosterAddr, address _batchPosterManager) {
+    constructor(
+        address _newSequencerInboxImpl,
+        address _rollup,
+        address _proxyAdminAddr,
+        address _espressoTEEVerifier,
+        address _oldBatchPosterAddr,
+        address _newBatchPosterAddr,
+        address _batchPosterManager,
+        bool _isRevert
+    ) {
         // If the new impl addresses are contracts, we need to revert
         if (!Address.isContract(_newSequencerInboxImpl)) {
             revert AddressIsNotContract(_newSequencerInboxImpl);
@@ -54,15 +64,15 @@ contract EspressoSequencerInboxMigrationAction {
             revert AddressIsNotContract(_proxyAdminAddr);
         }
 
-        if (!Address.isContract(_espressoTEEVerifier)){
+        if (!Address.isContract(_espressoTEEVerifier)) {
             revert AddressIsNotContract(_espressoTEEVerifier);
         }
 
-        if (_oldBatchPosterAddr == address(0x0)){
+        if (_oldBatchPosterAddr == address(0x0)) {
             revert OldBatchPosterMustNotBeZeroAddr();
         }
-        
-        if (_newBatchPosterAddr == address(0x0)){
+
+        if (_newBatchPosterAddr == address(0x0)) {
             revert NewBatchPosterMustNotBeZeroAddr();
         }
 
@@ -79,7 +89,8 @@ contract EspressoSequencerInboxMigrationAction {
         newBatchPosterAddr = _newBatchPosterAddr;
 
         batchPosterManager = _batchPosterManager;
-    
+
+        isRevert = _isRevert;
     }
 
     function perform() public {
@@ -89,7 +100,7 @@ contract EspressoSequencerInboxMigrationAction {
 
         TransparentUpgradeableProxy sequencerInbox =
             TransparentUpgradeableProxy(payable(address(rollupCore.sequencerInbox())));
-        
+
         // migrate the rollup to the new sequencer inbox
         proxyAdmin.upgrade(sequencerInbox, newSequencerInboxImpl);
 
@@ -98,22 +109,24 @@ contract EspressoSequencerInboxMigrationAction {
         if (proxyImpl != newSequencerInboxImpl) {
             revert SequencerInboxNotUpgraded(proxyImpl);
         }
-       
+
         SequencerInbox proxyInbox = SequencerInbox(address(rollupCore.sequencerInbox()));
         // Set the TEE verifier address
-        proxyInbox.setEspressoTEEVerifier(espressoTEEVerifier);
+        if (!isRevert) {
+            proxyInbox.setEspressoTEEVerifier(espressoTEEVerifier);
+        }
         // Remove the permissions for the old batch poster addresses
         proxyInbox.setIsBatchPoster(oldBatchPosterAddr, false);
-        // Whitelist the new batch posters address to enable it to post batches 
+        // Whitelist the new batch posters address to enable it to post batches
         proxyInbox.setIsBatchPoster(newBatchPosterAddr, true);
         // Set the batch poster manager.
-        if (batchPosterManager != address(0x0)){
-          proxyInbox.setBatchPosterManager(batchPosterManager);
+        if (batchPosterManager != address(0x0)) {
+            proxyInbox.setBatchPosterManager(batchPosterManager);
         }
 
         address proxyTEEVerifierAddr = address(proxyInbox.espressoTEEVerifier());
-        if (proxyTEEVerifierAddr != espressoTEEVerifier) {
-            revert espressoTEEVerifierNotSet(); 
+        if (!isRevert && (proxyTEEVerifierAddr != espressoTEEVerifier)) {
+            revert espressoTEEVerifierNotSet();
         }
     }
 }

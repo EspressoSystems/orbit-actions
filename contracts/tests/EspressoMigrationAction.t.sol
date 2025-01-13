@@ -170,20 +170,30 @@ contract MigrationTest is Test {
     function test_migrateToEspresso() public {
         //begin by seting pre-requisites in the vm so the test can get the data it needs.
         IRollupCore rollup = IRollupCore(rollupAddress);
-        
+
         address upgradeExecutorExpectedAddress = computeCreateAddress(address(rollupCreator), 4);
         //ensure we have the correct address for the proxy admin
         ProxyAdmin admin = ProxyAdmin(_getProxyAdmin(address(rollup.sequencerInbox())));
         address adminAddr = _getProxyAdmin(address(rollup.sequencerInbox()));
-       
+
         assertEq(admin.owner(), upgradeExecutorExpectedAddress, "Invalid proxyAdmin's owner");
 
         IUpgradeExecutor _upgradeExecutor = IUpgradeExecutor(upgradeExecutorExpectedAddress);
 
-        bytes memory data =
-            abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector);
+        bytes memory data = abi.encodeWithSelector(EspressoSequencerInboxMigrationAction.perform.selector);
 
-        address migration = address(new EspressoSequencerInboxMigrationAction(newSequencerImplAddress, rollupAddress, adminAddr, mockTEEVerifier, oldBatchPosterAddr, newBatchPosterAddr, batchPosterManagerAddr));
+        address migration = address(
+            new EspressoSequencerInboxMigrationAction(
+                newSequencerImplAddress,
+                rollupAddress,
+                adminAddr,
+                mockTEEVerifier,
+                oldBatchPosterAddr,
+                newBatchPosterAddr,
+                batchPosterManagerAddr,
+                false
+            )
+        );
 
         vm.prank(rollupOwner);
         _upgradeExecutor.execute(migration, data);
@@ -196,8 +206,6 @@ contract MigrationTest is Test {
             "Sequencer Inbox has not been updated"
         );
         SequencerInbox proxyInbox = SequencerInbox(address(rollup.sequencerInbox()));
-        assertEq(
-          mockTEEVerifier, address(proxyInbox.espressoTEEVerifier())
-        );
+        assertEq(mockTEEVerifier, address(proxyInbox.espressoTEEVerifier()));
     }
 }
