@@ -29,8 +29,7 @@ import {
     InvalidHeaderFlag,
     NativeTokenMismatch,
     BadMaxTimeVariation,
-    Deprecated,
-    InvalidCelestiaBatch
+    Deprecated
 } from "../libraries/Error.sol";
 import "./IBridge.sol";
 import "./IInboxBase.sol";
@@ -61,8 +60,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
 
     IBridge public bridge;
 
-    address public constant BLOBSTREAM = 0xa8973BDEf20fe4112C920582938EF2F022C911f5;
-
     /// @inheritdoc ISequencerInbox
     uint256 public constant HEADER_LENGTH = 40;
 
@@ -74,9 +71,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
 
     /// @inheritdoc ISequencerInbox
     bytes1 public constant DAS_MESSAGE_HEADER_FLAG = 0x80;
-
-    /// @inheritdoc ISequencerInbox
-    bytes1 public constant CELESTIA_MESSAGE_HEADER_FLAG = 0x63;
 
     /// @inheritdoc ISequencerInbox
     bytes1 public constant TREE_DAS_MESSAGE_HEADER_FLAG = 0x08;
@@ -189,14 +183,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         IBridge bridge_,
         ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_
     ) external onlyDelegated {
-        revert Deprecated();
-    }
-
-    function initialize(
-        IBridge bridge_,
-        ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_,
-        address _espressoTEEVerifier
-    ) external onlyDelegated {
         if (bridge != IBridge(address(0))) revert AlreadyInit();
         if (bridge_ == IBridge(address(0))) revert HadZeroInit();
 
@@ -216,7 +202,14 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         rollup = bridge_.rollup();
 
         _setMaxTimeVariation(maxTimeVariation_);
-        espressoTEEVerifier = IEspressoTEEVerifier(_espressoTEEVerifier);
+    }
+
+    function initialize(
+        IBridge bridge_,
+        ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_,
+        address _espressoTEEVerifier
+    ) external onlyDelegated {
+        revert Deprecated();
     }
 
     /// @notice Allows the rollup owner to sync the rollup address
@@ -353,9 +346,8 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
     }
 
     /**
-        Deprecated because we added a new method with TEE attestation quote
-        to verify that the batch is posted by the batch poster running in TEE.
-     */
+      Restore previous functionality while and deprecate the new version of this function 
+    */
     function addSequencerL2BatchFromOrigin(
         uint256 sequenceNumber,
         bytes calldata data,
@@ -406,6 +398,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
             timeBounds_,
             IBridge.BatchDataLocation.TxInput
         );
+
     }
 
     function addSequencerL2BatchFromOrigin(
@@ -481,10 +474,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         }
     }
 
-    /**
-        Deprecated because we added a new method with TEE attestation quote
-        to verify that the batch is posted by the batch poster running in TEE.
-     */
+
     function addSequencerL2Batch(
         uint256,
         bytes calldata,
@@ -493,49 +483,8 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         uint256,
         uint256
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
-        revert Deprecated();
-    }
 
-    /*
-     * addSequencerL2Batch is called by either the rollup admin or batch poster
-     * running in TEE to add a new batch
-     * @param sequenceNumber - the sequence number of the batch
-     * @param data - the data of the batch
-     * @param afterDelayedMessagesRead - the number of delayed messages read by the sequencer
-     * @param gasRefunder - the gas refunder contract
-     * @param prevMessageCount - the number of messages in the previous batch
-     * @param newMessageCount - the number of messages in the new batch
-     * @param quote - the atttestation quote from the TEE
-     */
-    function addSequencerL2Batch(
-        uint256 sequenceNumber,
-        bytes calldata data,
-        uint256 afterDelayedMessagesRead,
-        IGasRefunder gasRefunder,
-        uint256 prevMessageCount,
-        uint256 newMessageCount,
-        bytes memory quote
-    ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
         if (!isBatchPoster[msg.sender] && msg.sender != address(rollup)) revert NotBatchPoster();
-
-        // Only check the attestation quote if the batch has been posted by the
-        // batch poster
-        if (isBatchPoster[msg.sender]) {
-            // take keccak2256 hash of all the function arguments except the quote
-            bytes32 reportDataHash = keccak256(
-                abi.encode(
-                    sequenceNumber,
-                    data,
-                    afterDelayedMessagesRead,
-                    address(gasRefunder),
-                    prevMessageCount,
-                    newMessageCount
-                )
-            );
-            // verify the quote for the batch poster running in the TEE
-            espressoTEEVerifier.verify(quote, reportDataHash);
-            emit TEEAttestationQuoteVerified(sequenceNumber);
-        }
         (bytes32 dataHash, IBridge.TimeBounds memory timeBounds) = formCallDataHash(
             data,
             afterDelayedMessagesRead
@@ -580,6 +529,30 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         emit SequencerBatchData(seqMessageIndex, data);
     }
 
+    /*
+     * Deprecated in favor of old implementation for this revert contract.
+     * addSequencerL2Batch is called by either the rollup admin or batch poster
+     * running in TEE to add a new batch
+     * @param sequenceNumber - the sequence number of the batch
+     * @param data - the data of the batch
+     * @param afterDelayedMessagesRead - the number of delayed messages read by the sequencer
+     * @param gasRefunder - the gas refunder contract
+     * @param prevMessageCount - the number of messages in the previous batch
+     * @param newMessageCount - the number of messages in the new batch
+     * @param quote - the atttestation quote from the TEE
+     */
+    function addSequencerL2Batch(
+        uint256 sequenceNumber,
+        bytes calldata data,
+        uint256 afterDelayedMessagesRead,
+        IGasRefunder gasRefunder,
+        uint256 prevMessageCount,
+        uint256 newMessageCount,
+        bytes memory quote
+    ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
+        revert Deprecated();
+    }
+
     function packHeader(
         uint256 afterDelayedMessagesRead
     ) internal view returns (bytes memory, IBridge.TimeBounds memory) {
@@ -618,7 +591,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         return
             headerByte == BROTLI_MESSAGE_HEADER_FLAG ||
             headerByte == DAS_MESSAGE_HEADER_FLAG ||
-            headerByte == CELESTIA_MESSAGE_HEADER_FLAG ||
             (headerByte == (DAS_MESSAGE_HEADER_FLAG | TREE_DAS_MESSAGE_HEADER_FLAG)) ||
             headerByte == ZERO_HEAVY_MESSAGE_HEADER_FLAG;
     }
@@ -654,10 +626,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
                 // we skip the first byte, then read the next 32 bytes for the keyset
                 bytes32 dasKeysetHash = bytes32(data[1:33]);
                 if (!dasKeySetInfo[dasKeysetHash].isValidKeyset) revert NoSuchKeyset(dasKeysetHash);
-            }
-
-            if (data[0] & CELESTIA_MESSAGE_HEADER_FLAG != 0 && data.length != 89) {
-                revert InvalidCelestiaBatch();
             }
         }
         return (keccak256(bytes.concat(header, data)), timeBounds);
