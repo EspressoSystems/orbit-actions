@@ -493,49 +493,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         uint256,
         uint256
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
-        revert Deprecated();
-    }
-
-    /*
-     * addSequencerL2Batch is called by either the rollup admin or batch poster
-     * running in TEE to add a new batch
-     * @param sequenceNumber - the sequence number of the batch
-     * @param data - the data of the batch
-     * @param afterDelayedMessagesRead - the number of delayed messages read by the sequencer
-     * @param gasRefunder - the gas refunder contract
-     * @param prevMessageCount - the number of messages in the previous batch
-     * @param newMessageCount - the number of messages in the new batch
-     * @param quote - the atttestation quote from the TEE
-     */
-    function addSequencerL2Batch(
-        uint256 sequenceNumber,
-        bytes calldata data,
-        uint256 afterDelayedMessagesRead,
-        IGasRefunder gasRefunder,
-        uint256 prevMessageCount,
-        uint256 newMessageCount,
-        bytes memory quote
-    ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
         if (!isBatchPoster[msg.sender] && msg.sender != address(rollup)) revert NotBatchPoster();
-
-        // Only check the attestation quote if the batch has been posted by the
-        // batch poster
-        if (isBatchPoster[msg.sender]) {
-            // take keccak2256 hash of all the function arguments except the quote
-            bytes32 reportDataHash = keccak256(
-                abi.encode(
-                    sequenceNumber,
-                    data,
-                    afterDelayedMessagesRead,
-                    address(gasRefunder),
-                    prevMessageCount,
-                    newMessageCount
-                )
-            );
-            // verify the quote for the batch poster running in the TEE
-            espressoTEEVerifier.verify(quote, reportDataHash);
-            emit TEEAttestationQuoteVerified(sequenceNumber);
-        }
         (bytes32 dataHash, IBridge.TimeBounds memory timeBounds) = formCallDataHash(
             data,
             afterDelayedMessagesRead
@@ -578,6 +536,29 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
             );
         }
         emit SequencerBatchData(seqMessageIndex, data);
+    }
+
+    /*
+     * addSequencerL2Batch is called by either the rollup admin or batch poster
+     * running in TEE to add a new batch
+     * @param sequenceNumber - the sequence number of the batch
+     * @param data - the data of the batch
+     * @param afterDelayedMessagesRead - the number of delayed messages read by the sequencer
+     * @param gasRefunder - the gas refunder contract
+     * @param prevMessageCount - the number of messages in the previous batch
+     * @param newMessageCount - the number of messages in the new batch
+     * @param quote - the atttestation quote from the TEE
+     */
+    function addSequencerL2Batch(
+        uint256 sequenceNumber,
+        bytes calldata data,
+        uint256 afterDelayedMessagesRead,
+        IGasRefunder gasRefunder,
+        uint256 prevMessageCount,
+        uint256 newMessageCount,
+        bytes memory quote
+    ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
+      Deprecated()  
     }
 
     function packHeader(
