@@ -101,7 +101,7 @@ Between the first and second deployment, you need to record the address of the n
 #### DeployAndInitEspressoSequencerInbox.s.sol
 
 ```
-forge script --chain $PARENT_CHAIN_CHAIN_ID contracts/parent-chain/espresso-migration/DeployAndInitEspressoSequencerInbox.s.sol:DeployAndInitEspressoSequencerInbox --rpc-url $PARENT_CHAIN_RPC_URL --broadcast -vvvv --skip-simulation
+forge script --chain $PARENT_CHAIN_CHAIN_ID contracts/parent-chain/espresso-migration/DeployAndInitEspressoSequencerInbox.s.sol:DeployAndInitEspressoSequencerInbox --rpc-url $PARENT_CHAIN_RPC_URL --broadcast -vvvv --verify --skip-simulation --etherscan-api-key YOUR_ETHERSCAN_KEY
 ```
 
 In a similar manner, you will need to record the sequencer inbox address in the env var `NEW_SEQUENCER_INBOX_IMPL_ADDRESS` after the second step during the migration.
@@ -115,7 +115,7 @@ cat broadcast/DeployAndInitEspressoSequencerInbox.s.sol/$PARENT_CHAIN_ID/run-lat
 #### DeployEspressoSequencerMigrationAction.s.sol
 
 ```
-forge script --chain $PARENT_CHAIN_CHAIN_ID contracts/parent-chain/espresso-migration/DeployEspressoSequencerMigrationAction.s.sol:DeployEspressoSequencerMigrationAction --rpc-url $PARENT_CHAIN_RPC_URL --broadcast -vvvv --skip-simulation
+forge script --chain $PARENT_CHAIN_CHAIN_ID contracts/parent-chain/espresso-migration/DeployEspressoSequencerMigrationAction.s.sol:DeployEspressoSequencerMigrationAction --rpc-url $PARENT_CHAIN_RPC_URL --broadcast -vvvv --verify --skip-simulation --etherscan-api-key YOUR_ETHERSCAN_KEY
 
 ```
 
