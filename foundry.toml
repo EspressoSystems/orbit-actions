@@ -16,7 +16,7 @@ remappings = [
 ]
 test = 'test'
 cache_path  = 'cache_forge'
-solc_version = '0.8.22'
+solc_version = '0.8.25'
 optimizer = true
 optimizer_runs = 2000
 via_ir = true
