@@ -22,3 +22,4 @@ optimizer_runs = 2000
 via_ir = true
 fs_permissions = [{ access = "read", path = "node_modules/@arbitrum/nitro-contracts-1.2.1"}, { access = "read-write", path = "./scripts/foundry"}]
 script = 'scripts'
+via-ir = true

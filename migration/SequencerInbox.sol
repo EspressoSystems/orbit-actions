@@ -189,14 +189,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         IBridge bridge_,
         ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_
     ) external onlyDelegated {
-        revert Deprecated();
-    }
-
-    function initialize(
-        IBridge bridge_,
-        ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_,
-        address _espressoTEEVerifier
-    ) external onlyDelegated {
         if (bridge != IBridge(address(0))) revert AlreadyInit();
         if (bridge_ == IBridge(address(0))) revert HadZeroInit();
 
@@ -216,7 +208,14 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         rollup = bridge_.rollup();
 
         _setMaxTimeVariation(maxTimeVariation_);
-        espressoTEEVerifier = IEspressoTEEVerifier(_espressoTEEVerifier);
+    }
+
+    function initialize(
+        IBridge bridge_,
+        ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_,
+        address _espressoTEEVerifier
+    ) external onlyDelegated {
+        revert Deprecated();
     }
 
     /// @notice Allows the rollup owner to sync the rollup address
@@ -353,9 +352,8 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
     }
 
     /**
-        Deprecated because we added a new method with TEE attestation quote
-        to verify that the batch is posted by the batch poster running in TEE.
-     */
+      Restore previous functionality while and deprecate the new version of this function 
+    */
     function addSequencerL2BatchFromOrigin(
         uint256 sequenceNumber,
         bytes calldata data,
@@ -406,6 +404,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
             timeBounds_,
             IBridge.BatchDataLocation.TxInput
         );
+
     }
 
     function addSequencerL2BatchFromOrigin(
@@ -481,18 +480,16 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         }
     }
 
-    /**
-        Deprecated because we added a new method with TEE attestation quote
-        to verify that the batch is posted by the batch poster running in TEE.
-     */
+
     function addSequencerL2Batch(
-        uint256 sequenceNumber,
-        bytes calldata data,
-        uint256 afterDelayedMessagesRead,
+        uint256,
+        bytes calldata,
+        uint256,
         IGasRefunder gasRefunder,
-        uint256 prevMessageCount,
-        uint256 newMessageCount
+        uint256,
+        uint256
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
+
         if (!isBatchPoster[msg.sender] && msg.sender != address(rollup)) revert NotBatchPoster();
         (bytes32 dataHash, IBridge.TimeBounds memory timeBounds) = formCallDataHash(
             data,
@@ -539,6 +536,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
     }
 
     /*
+     * Deprecated in favor of old implementation for this revert contract.
      * addSequencerL2Batch is called by either the rollup admin or batch poster
      * running in TEE to add a new batch
      * @param sequenceNumber - the sequence number of the batch
@@ -558,7 +556,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         uint256 newMessageCount,
         bytes memory quote
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
-      Deprecated()  
+        revert Deprecated();
     }
 
     function packHeader(
