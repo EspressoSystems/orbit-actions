@@ -482,12 +482,12 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
 
 
     function addSequencerL2Batch(
-        uint256,
-        bytes calldata,
-        uint256,
+        uint256 sequenceNumber,
+        bytes calldata data,
+        uint256 afterDelayedMessagesRead,
         IGasRefunder gasRefunder,
-        uint256,
-        uint256
+        uint256 prevMessageCount,
+        uint256 newMessageCount
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
 
         if (!isBatchPoster[msg.sender] && msg.sender != address(rollup)) revert NotBatchPoster();
