@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import {DeploymentHelpersScript} from "../helper/DeploymentHelpers.s.sol";
 import {EnableFastConfirmAction} from "../../../contracts/parent-chain/fast-confirm/EnableFastConfirmAction.sol";

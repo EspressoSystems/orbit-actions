@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import 'forge-std/Script.sol';
 import { NitroContracts2Point1Point2UpgradeAction, ProxyAdmin } from '../../../../contracts/parent-chain/contract-upgrades/NitroContracts2Point1Point2UpgradeAction.sol';

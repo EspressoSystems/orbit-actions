@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import { DeploymentHelpersScript } from '../../helper/DeploymentHelpers.s.sol';
 import { CelestiaNitroContracts2Point1Point3UpgradeAction, IOneStepProofEntry } from '../../../../contracts/parent-chain/contract-upgrades/CelestiaNitroContracts2Point1Point3UpgradeAction.sol';
