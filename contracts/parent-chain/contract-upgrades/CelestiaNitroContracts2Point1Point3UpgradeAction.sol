@@ -10,8 +10,9 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {IChallengeManagerUpgradeInit, IRollupUpgrade} from "./CelestiaNitroContracts2Point1Point0UpgradeAction.sol";
-// Give an interface to espresso specific funcitions as changing the interface and import led to 
+// Give an interface to espresso specific funcitions as changing the interface and import led to
 // multiple definitions for ISequencerInbox due to the imports from CelestiaNitroContracts2Point1Point0UpgradeAction.
+
 interface IEspressoSequencerInbox {
     function setEspressoTEEVerifier(address _espressoTEEVerifier) external;
     function espressoTEEVerifier() external view returns (address);
@@ -89,8 +90,9 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
             Address.isContract(address(_condOsp)),
             "NitroContracts2Point1Point0UpgradeAction: _condOsp is not a contract"
         );
-        require(Address.isContract(address(_espressoTEEVerifier)),
-                "CelestiaNitroContracts2Point1Point3UpgradeAction: _espressoTEEVerifier is not a contract"
+        require(
+            Address.isContract(address(_espressoTEEVerifier)),
+            "CelestiaNitroContracts2Point1Point3UpgradeAction: _espressoTEEVerifier is not a contract"
         );
 
         newEthInboxImpl = _newEthInboxImpl;
@@ -147,8 +149,10 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
         );
 
         // verify
-        require(IEspressoSequencerInbox(sequencerInbox).espressoTEEVerifier() == newEspressoTEEVerifier,
-               "CelestiaNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox");
+        require(
+            IEspressoSequencerInbox(sequencerInbox).espressoTEEVerifier() == newEspressoTEEVerifier,
+            "CelestiaNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox"
+        );
         require(
             proxyAdmin.getProxyImplementation(challengeManager) == newChallengeManagerImpl,
             "CelestiaNitroContracts2Point1Point3UpgradeAction: new challenge manager implementation set"
