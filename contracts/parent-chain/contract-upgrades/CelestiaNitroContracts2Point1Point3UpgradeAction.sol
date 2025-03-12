@@ -41,6 +41,7 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
     address public immutable newERC20InboxImpl;
     address public immutable newEthSequencerInboxImpl;
     address public immutable newERC20SequencerInboxImpl;
+    address public immutable newEspressoTEEVerifier;
 
     constructor(
         address _newEthInboxImpl,
@@ -51,7 +52,8 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
         address _newChallengeManagerImpl,
         IOneStepProofEntry _osp,
         bytes32 _condRoot,
-        IOneStepProofEntry _condOsp
+        IOneStepProofEntry _condOsp,
+        address _espressoTEEVerifier,
     ) {
         require(
             Address.isContract(_newEthInboxImpl),
@@ -81,6 +83,9 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
             Address.isContract(address(_condOsp)),
             "NitroContracts2Point1Point0UpgradeAction: _condOsp is not a contract"
         );
+        require(Address.isContract(address(_espressoTEEVerifier)),
+                "CelestiaNitroContracts2Point1Point3UpgradeAction: _espressoTEEVerifier is not a contract"
+        );
 
         newEthInboxImpl = _newEthInboxImpl;
         newERC20InboxImpl = _newERC20InboxImpl;
@@ -92,6 +97,7 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
         osp = _osp;
         condRoot = _condRoot;
         condOsp = _condOsp;
+        newEspressoTEEVerifier = _espressoTEEVerifier;
     }
 
     function perform(IRollupCore rollup, address inbox, ProxyAdmin proxyAdmin) external {
@@ -117,6 +123,7 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
             implementation: isERC20 ? newERC20SequencerInboxImpl : newEthSequencerInboxImpl
         });
 
+        ISequencerInbox(sequencerInbox).setEspressoTEEVerifier(newEspressoTEEVerifier);
         // upgrade the inbox
         proxyAdmin.upgrade({
             proxy: TransparentUpgradeableProxy(payable((inbox))),
@@ -133,6 +140,8 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
         );
 
         // verify
+        require(ISequencerInbox(sequencerInbox).espressoTEEVerifier() == newEspressoTEEVerifier,
+               "CelestiaNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox")
         require(
             proxyAdmin.getProxyImplementation(challengeManager) == newChallengeManagerImpl,
             "CelestiaNitroContracts2Point1Point3UpgradeAction: new challenge manager implementation set"
