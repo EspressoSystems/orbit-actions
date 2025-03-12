@@ -27,6 +27,8 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
             vm.etch(address(100), mockArbSysCode);
         }
 
+        address espressoTEEVerifier = vm.envAddress("ESPRESSO_TEE_VERIFIER_ADDRESS");
+        
         vm.startBroadcast();
         // deploy new osp from v2.1.0
         address newOsp;
@@ -146,7 +148,8 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
             _newChallengeManagerImpl: challengeManager,
             _osp: IOneStepProofEntry(newOsp),
             _condRoot: COND_WASM_MODULE_ROOT,
-            _condOsp: IOneStepProofEntry(condOsp)
+            _condOsp: IOneStepProofEntry(condOsp),
+            _espressoTEEVerifier: espressoTEEVerifier
         });
 
         vm.stopBroadcast();

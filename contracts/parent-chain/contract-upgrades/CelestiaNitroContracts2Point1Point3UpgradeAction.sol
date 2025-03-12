@@ -148,7 +148,7 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
 
         // verify
         require(IEspressoSequencerInbox(sequencerInbox).espressoTEEVerifier() == newEspressoTEEVerifier,
-               "CelestiaNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox")
+               "CelestiaNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox");
         require(
             proxyAdmin.getProxyImplementation(challengeManager) == newChallengeManagerImpl,
             "CelestiaNitroContracts2Point1Point3UpgradeAction: new challenge manager implementation set"
