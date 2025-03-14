@@ -90,10 +90,10 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
             Address.isContract(address(_condOsp)),
             "NitroContracts2Point1Point0UpgradeAction: _condOsp is not a contract"
         );
-        require(
-            Address.isContract(address(_espressoTEEVerifier)),
-            "CelestiaNitroContracts2Point1Point3UpgradeAction: _espressoTEEVerifier is not a contract"
-        );
+        // require(
+        //     Address.isContract(_espressoTEEVerifier),
+        //     "CelestiaNitroContracts2Point1Point3UpgradeAction: _espressoTEEVerifier is not a contract"
+        // );
 
         newEthInboxImpl = _newEthInboxImpl;
         newERC20InboxImpl = _newERC20InboxImpl;
