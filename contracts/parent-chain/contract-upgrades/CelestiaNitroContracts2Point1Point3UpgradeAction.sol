@@ -12,6 +12,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IChallengeManagerUpgradeInit, IRollupUpgrade} from "./CelestiaNitroContracts2Point1Point0UpgradeAction.sol";
 // Give an interface to espresso specific funcitions as changing the interface and import led to
 // multiple definitions for ISequencerInbox due to the imports from CelestiaNitroContracts2Point1Point0UpgradeAction.
+
 interface IEspressoSequencerInbox {
     function setEspressoTEEVerifier(address _espressoTEEVerifier) external;
     function espressoTEEVerifier() external view returns (address);
@@ -38,6 +39,7 @@ interface IERC20Bridge_v2 {
 contract CelestiaNitroContracts2Point1Point3UpgradeAction {
     // Celestia migration requirements
     event Debug(string);
+
     bytes32 public immutable newWasmModuleRoot;
     IOneStepProofEntry public immutable osp;
     bytes32 public immutable condRoot;
