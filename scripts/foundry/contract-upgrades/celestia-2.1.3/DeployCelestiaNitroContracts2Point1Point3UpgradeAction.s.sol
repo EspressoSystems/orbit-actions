@@ -27,6 +27,8 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
             vm.etch(address(100), mockArbSysCode);
         }
 
+        address espressoTEEVerifier = vm.envAddress("ESPRESSO_TEE_VERIFIER_ADDRESS");
+
         vm.startBroadcast();
         // deploy new osp from v2.1.0
         address newOsp;
@@ -126,13 +128,13 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
 
         // deploy new EthSequencerInbox contract from v2.1.3
         address newEthSeqInboxImpl = deployBytecodeWithConstructorFromJSON(
-            "/celestia-2.1.3/SequencerInbox.sol/SequencerInbox.json",
+            "/celestia-2.1.3/espresso/SequencerInbox.sol/SequencerInbox.json",
             abi.encode(vm.envUint("MAX_DATA_SIZE"), reader4844Address, false)
         );
 
         // deploy new Erc20SequencerInbox contract from v2.1.3
         address newErc20SeqInboxImpl = deployBytecodeWithConstructorFromJSON(
-            "/celestia-2.1.3/SequencerInbox.sol/SequencerInbox.json",
+            "/celestia-2.1.3/espresso/SequencerInbox.sol/SequencerInbox.json",
             abi.encode(vm.envUint("MAX_DATA_SIZE"), reader4844Address, true)
         );
 
@@ -146,7 +148,8 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
             _newChallengeManagerImpl: challengeManager,
             _osp: IOneStepProofEntry(newOsp),
             _condRoot: COND_WASM_MODULE_ROOT,
-            _condOsp: IOneStepProofEntry(condOsp)
+            _condOsp: IOneStepProofEntry(condOsp),
+            _espressoTEEVerifier: espressoTEEVerifier
         });
 
         vm.stopBroadcast();
