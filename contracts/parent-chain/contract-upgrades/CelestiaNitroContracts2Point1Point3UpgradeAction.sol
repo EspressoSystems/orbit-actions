@@ -38,8 +38,6 @@ interface IERC20Bridge_v2 {
  */
 contract CelestiaNitroContracts2Point1Point3UpgradeAction {
     // Celestia migration requirements
-    event Debug(string);
-
     bytes32 public immutable newWasmModuleRoot;
     IOneStepProofEntry public immutable osp;
     bytes32 public immutable condRoot;
@@ -111,7 +109,6 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
     }
 
     function perform(IRollupCore rollup, address inbox, ProxyAdmin proxyAdmin) external {
-        emit Debug("Start of Perform");
         address bridge = IInbox(inbox).bridge();
         address sequencerInbox = IInbox(inbox).sequencerInbox();
 
@@ -127,7 +124,6 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
                 revert("CelestiaNitroContracts2Point1Point3UpgradeAction: bridge is an ERC20Bridge below v2.x.x");
             }
         } catch {}
-        emit Debug("After ERC20 check");
         // upgrade the sequencer inbox
         proxyAdmin.upgrade({
             proxy: TransparentUpgradeableProxy(payable((sequencerInbox))),
@@ -138,7 +134,6 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
 
         // Set the new EspressoTEEVerifier address.
         IEspressoSequencerInbox(sequencerInbox).setEspressoTEEVerifier(newEspressoTEEVerifier);
-        emit Debug("After setTEEVerifier");
         // upgrade the inbox
         proxyAdmin.upgrade({
             proxy: TransparentUpgradeableProxy(payable((inbox))),
