@@ -40,7 +40,7 @@ import "../rollup/IRollupLogic.sol";
 import "./Messages.sol";
 import "../precompiles/ArbGasInfo.sol";
 import "../precompiles/ArbSys.sol";
-import "../libraries/CallerChecker.sol"
+import "../libraries/CallerChecker.sol";
 import "../libraries/IReader4844.sol";
 
 import {L1MessageType_batchPostingReport} from "../libraries/MessageTypes.sol";
@@ -560,7 +560,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         uint256 newMessageCount,
         bytes memory quote
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
-      Deprecated()  
+        revert Deprecated();
     }
 
     function packHeader(
