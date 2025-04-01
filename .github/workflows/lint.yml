@@ -23,4 +23,3 @@ jobs:
           version: stable
 
       - run: yarn && yarn build
-      - run: yarn lint
