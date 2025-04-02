@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {DeploymentHelpersScript} from "../../../scripts/foundry/helper/DeploymentHelpers.s.sol";
+import {DeploymentHelpersScript} from "../../../../scripts/foundry/helper/DeploymentHelpers.s.sol";
 import "nitro-contracts/bridge/SequencerInbox.sol";
 import "nitro-contracts/bridge/ISequencerInbox.sol";
 
@@ -23,7 +23,7 @@ contract Deploy2Point1Point3EspressoSequencerInbox is DeploymentHelpersScript {
         vm.startBroadcast(deployerPrivateKey);
         // deploy new SequencerInbox contract from v2.1.3
         address newErc20SeqInboxImpl = deployBytecodeWithConstructorFromJSON(
-            "/migration/espresso-2.1.3/SequencerInbox.json",
+            "/migration/espresso-2.1.0/SequencerInbox.json",
             abi.encode(maxDataSize, reader4844Addr, isUsingFeeToken)
         );
         vm.stopBroadcast();
