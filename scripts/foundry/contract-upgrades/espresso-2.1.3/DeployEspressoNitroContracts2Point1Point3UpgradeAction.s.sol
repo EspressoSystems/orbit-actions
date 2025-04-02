@@ -44,13 +44,13 @@ contract DeployEspressoNitroContracts2Point1Point3UpgradeActionScript is Deploym
 
         // deploy new EthSequencerInbox contract from v2.1.3
         address newEthSeqInboxImpl = deployBytecodeWithConstructorFromJSON(
-            "/espresso-2.1.3/SequencerInbox.json",
+            "/migration/espresso-2.1.3/SequencerInbox.json",
             abi.encode(vm.envUint("MAX_DATA_SIZE"), reader4844Address, false)
         );
 
         // deploy new Erc20SequencerInbox contract from v2.1.3
         address newErc20SeqInboxImpl = deployBytecodeWithConstructorFromJSON(
-            "/espresso-2.1.3/SequencerInbox.json",
+            "/migration/espresso-2.1.3/SequencerInbox.json",
             abi.encode(vm.envUint("MAX_DATA_SIZE"), reader4844Address, true)
         );
 
