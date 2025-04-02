@@ -11,6 +11,7 @@ interface IEspressoSequencerInbox {
     function setEspressoTEEVerifier(address _espressoTEEVerifier) external;
     function espressoTEEVerifier() external view returns (address);
 }
+
 interface IInbox {
     function bridge() external view returns (address);
     function sequencerInbox() external view returns (address);
@@ -36,6 +37,7 @@ contract EspressoNitroContracts2Point1Point3UpgradeAction {
     address public immutable newEthSequencerInboxImpl;
     address public immutable newERC20SequencerInboxImpl;
     address public immutable newEspressoTEEVerifierAddress;
+
     constructor(
         address _newEthInboxImpl,
         address _newERC20InboxImpl,
