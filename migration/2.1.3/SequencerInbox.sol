@@ -31,7 +31,6 @@ import {
     NativeTokenMismatch,
     BadMaxTimeVariation,
     Deprecated,
-    InvalidCelestiaBatch
 } from "../libraries/Error.sol";
 import "./IBridge.sol";
 import "./IInboxBase.sol";
@@ -76,9 +75,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
 
     /// @inheritdoc ISequencerInbox
     bytes1 public constant DAS_MESSAGE_HEADER_FLAG = 0x80;
-
-    /// @inheritdoc ISequencerInbox
-    bytes1 public constant CELESTIA_MESSAGE_HEADER_FLAG = 0x63;
 
     /// @inheritdoc ISequencerInbox
     bytes1 public constant TREE_DAS_MESSAGE_HEADER_FLAG = 0x08;
@@ -601,7 +597,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         return
             headerByte == BROTLI_MESSAGE_HEADER_FLAG ||
             headerByte == DAS_MESSAGE_HEADER_FLAG ||
-            headerByte == CELESTIA_MESSAGE_HEADER_FLAG ||
             (headerByte == (DAS_MESSAGE_HEADER_FLAG | TREE_DAS_MESSAGE_HEADER_FLAG)) ||
             headerByte == ZERO_HEAVY_MESSAGE_HEADER_FLAG;
     }
@@ -638,10 +633,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
                 bytes32 dasKeysetHash = bytes32(data[1:33]);
                 if (!dasKeySetInfo[dasKeysetHash].isValidKeyset) revert NoSuchKeyset(dasKeysetHash);
             }
-
-            if (data[0] & CELESTIA_MESSAGE_HEADER_FLAG != 0 && data.length != 89) {
-                revert InvalidCelestiaBatch();
-            }
+ 
         }
         return (keccak256(bytes.concat(header, data)), timeBounds);
     }
