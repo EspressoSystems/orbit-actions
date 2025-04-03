@@ -6,7 +6,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 // Give an interface to espresso specific funcitions as changing the interface and import led to
-// multiple definitions for ISequencerInbox due to the imports from CelestiaNitroContracts2Point1Point0UpgradeAction.
+// multiple definitions for ISequencerInbox.
 interface IEspressoSequencerInbox {
     function setEspressoTEEVerifier(address _espressoTEEVerifier) external;
     function espressoTEEVerifier() external view returns (address);
@@ -117,7 +117,7 @@ contract EspressoNitroContracts2Point1Point3UpgradeAction {
         //Verify that all of the espresso upgrades have completed.
         require(
             IEspressoSequencerInbox(sequencerInbox).espressoTEEVerifier() == newEspressoTEEVerifierAddress,
-            "CelestiaNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox"
+            "EspressoNitroContracts2Point1Point3UpgradeAction: new EspressoTEEVerifier set in SequencerInbox"
         );
     }
 }
