@@ -1,4 +1,4 @@
-// Copyright 2021-2022, Offchain Labs, Inc.
+// Copyright 2021-2022, Espresso Systems.
 // For license information, see https://github.com/OffchainLabs/nitro-contracts/blob/main/LICENSE
 // SPDX-License-Identifier: BUSL-1.1
 
@@ -21,6 +21,7 @@ import {
     NoSuchKeyset,
     NotForked,
     NotBatchPosterManager,
+    NotCodelessOrigin,
     RollupNotChanged,
     DataBlobsNotSupported,
     InitParamZero,
@@ -29,7 +30,7 @@ import {
     InvalidHeaderFlag,
     NativeTokenMismatch,
     BadMaxTimeVariation,
-    Deprecated
+    Deprecated,
 } from "../libraries/Error.sol";
 import "./IBridge.sol";
 import "./IInboxBase.sol";
@@ -38,6 +39,7 @@ import "../rollup/IRollupLogic.sol";
 import "./Messages.sol";
 import "../precompiles/ArbGasInfo.sol";
 import "../precompiles/ArbSys.sol";
+import "../libraries/CallerChecker.sol";
 import "../libraries/IReader4844.sol";
 
 import {L1MessageType_batchPostingReport} from "../libraries/MessageTypes.sol";
@@ -59,6 +61,8 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
     uint256 public totalDelayedMessagesRead;
 
     IBridge public bridge;
+
+    address public constant BLOBSTREAM = 0xa8973BDEf20fe4112C920582938EF2F022C911f5;
 
     /// @inheritdoc ISequencerInbox
     uint256 public constant HEADER_LENGTH = 40;
@@ -183,6 +187,14 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         IBridge bridge_,
         ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_
     ) external onlyDelegated {
+        revert Deprecated();
+    }
+
+    function initialize(
+        IBridge bridge_,
+        ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_,
+        address _espressoTEEVerifier
+    ) external onlyDelegated {
         if (bridge != IBridge(address(0))) revert AlreadyInit();
         if (bridge_ == IBridge(address(0))) revert HadZeroInit();
 
@@ -202,14 +214,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         rollup = bridge_.rollup();
 
         _setMaxTimeVariation(maxTimeVariation_);
-    }
-
-    function initialize(
-        IBridge bridge_,
-        ISequencerInbox.MaxTimeVariation calldata maxTimeVariation_,
-        address _espressoTEEVerifier
-    ) external onlyDelegated {
-        revert Deprecated();
+        espressoTEEVerifier = IEspressoTEEVerifier(_espressoTEEVerifier);
     }
 
     /// @notice Allows the rollup owner to sync the rollup address
@@ -346,8 +351,9 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
     }
 
     /**
-      Restore previous functionality while and deprecate the new version of this function 
-    */
+        Deprecated because we added a new method with TEE attestation quote
+        to verify that the batch is posted by the batch poster running in TEE.
+     */
     function addSequencerL2BatchFromOrigin(
         uint256 sequenceNumber,
         bytes calldata data,
@@ -357,6 +363,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         uint256 newMessageCount
     ) external refundsGas(gasRefunder, IReader4844(address(0))) {
         // solhint-disable-next-line avoid-tx-origin
+        if(!CallerChecker.isCallerCodelessOrigin()) revert NotCodelessOrigin();
         if (msg.sender != tx.origin) revert NotOrigin();
         if (!isBatchPoster[msg.sender]) revert NotBatchPoster();
         (bytes32 dataHash, IBridge.TimeBounds memory timeBounds) = formCallDataHash(
@@ -398,7 +405,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
             timeBounds_,
             IBridge.BatchDataLocation.TxInput
         );
-
     }
 
     function addSequencerL2BatchFromOrigin(
@@ -466,24 +472,25 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
         if (hostChainIsArbitrum) revert DataBlobsNotSupported();
 
         // submit a batch spending report to refund the entity that produced the blob batch data
-        // same as using calldata, we only submit spending report if the caller is the origin of the tx
+        // same as using calldata, we only submit spending report if the caller is the origin and is codeless
         // such that one cannot "double-claim" batch posting refund in the same tx
-        // solhint-disable-next-line avoid-tx-origin
-        if (msg.sender == tx.origin && !isUsingFeeToken) {
+        if (CallerChecker.isCallerCodelessOrigin() && !isUsingFeeToken) {
             submitBatchSpendingReport(dataHash, seqMessageIndex, block.basefee, blobGas);
         }
     }
 
-
+    /**
+        Deprecated because we added a new method with TEE attestation quote
+        to verify that the batch is posted by the batch poster running in TEE.
+     */
     function addSequencerL2Batch(
-        uint256,
-        bytes calldata,
-        uint256,
+        uint256 sequenceNumber,
+        bytes calldata data,
+        uint256 afterDelayedMessagesRead,
         IGasRefunder gasRefunder,
-        uint256,
-        uint256
+        uint256 prevMessageCount,
+        uint256 newMessageCount
     ) external override refundsGas(gasRefunder, IReader4844(address(0))) {
-
         if (!isBatchPoster[msg.sender] && msg.sender != address(rollup)) revert NotBatchPoster();
         (bytes32 dataHash, IBridge.TimeBounds memory timeBounds) = formCallDataHash(
             data,
@@ -530,7 +537,6 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
     }
 
     /*
-     * Deprecated in favor of old implementation for this revert contract.
      * addSequencerL2Batch is called by either the rollup admin or batch poster
      * running in TEE to add a new batch
      * @param sequenceNumber - the sequence number of the batch
@@ -627,6 +633,7 @@ contract SequencerInbox is DelegateCallAware, GasRefundEnabled, ISequencerInbox 
                 bytes32 dasKeysetHash = bytes32(data[1:33]);
                 if (!dasKeySetInfo[dasKeysetHash].isValidKeyset) revert NoSuchKeyset(dasKeysetHash);
             }
+ 
         }
         return (keccak256(bytes.concat(header, data)), timeBounds);
     }
