@@ -7,13 +7,15 @@ import {
     IOneStepProofEntry
 } from "../../../../contracts/parent-chain/contract-upgrades/CelestiaNitroContracts2Point1Point3UpgradeAction.sol";
 import {MockArbSys} from "../../helper/MockArbSys.sol";
-
 /**
  * @title DeployNitroContracts2Point1Point3UpgradeActionScript
  * @notice This script deploys the ERC20Bridge contract and NitroContracts2Point1Point3UpgradeAction contract.
  */
+
 contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is DeploymentHelpersScript {
+    error OspHostIoNotDeployed(uint256);
     // https://github.com/celestiaorg/nitro/releases/tag/v3.2.1-rc.1
+
     bytes32 public constant WASM_MODULE_ROOT = 0xe81f986823a85105c5fd91bb53b4493d38c0c26652d23f76a7405ac889908287;
 
     // ArbOS v20 https://github.com/OffchainLabs/nitro/releases/tag/consensus-v20
@@ -73,6 +75,9 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
                 );
             }
 
+            if (ospHostIo == address(0x0)) {
+                revert OspHostIoNotDeployed(chainId);
+            }
             newOsp = deployBytecodeWithConstructorFromJSON(
                 "/node_modules/@arbitrum/nitro-contracts-2.1.0/build/contracts/src/osp/OneStepProofEntry.sol/OneStepProofEntry.json",
                 abi.encode(osp0, ospMemory, ospMath, ospHostIo)
