@@ -131,9 +131,6 @@ contract CelestiaNitroContracts2Point1Point3UpgradeAction {
         });
         // Set the new EspressoTEEVerifier address.
         IEspressoSequencerInbox(sequencerInbox).setEspressoTEEVerifier(newEspressoTEEVerifier);
-
-        // Set the new EspressoTEEVerifier address.
-        IEspressoSequencerInbox(sequencerInbox).setEspressoTEEVerifier(newEspressoTEEVerifier);
         // upgrade the inbox
         proxyAdmin.upgrade({
             proxy: TransparentUpgradeableProxy(payable((inbox))),
