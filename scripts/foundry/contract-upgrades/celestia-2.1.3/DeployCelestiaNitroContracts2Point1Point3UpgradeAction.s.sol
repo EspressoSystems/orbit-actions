@@ -16,7 +16,7 @@ contract DeployCelestiaNitroContracts2Point1Point3UpgradeActionScript is Deploym
     error OspHostIoNotDeployed(uint256);
     // https://github.com/celestiaorg/nitro/releases/tag/v3.2.1-rc.1
 
-    bytes32 public constant WASM_MODULE_ROOT = 0xaf1dbdfceb871c00bfbb1675983133df04f0ed04e89647812513c091e3a982b3;
+    bytes32 public constant WASM_MODULE_ROOT = 0xe81f986823a85105c5fd91bb53b4493d38c0c26652d23f76a7405ac889908287;
 
     // ArbOS v20 https://github.com/OffchainLabs/nitro/releases/tag/consensus-v20
     bytes32 public constant COND_WASM_MODULE_ROOT = 0x8b104a2e80ac6165dc58b9048de12f301d70b02a0ab51396c22b4b4b802a16a4;
