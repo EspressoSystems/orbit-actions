@@ -9,6 +9,7 @@ It will provide step by step instructions that will walk you through the migrati
     3. Contract execution
     4. Useful commands
     5. Reverting
+    6. Generating hardhat artificats
 
 
 ## 1. Pre-requisites
@@ -156,8 +157,21 @@ In the unlikely case that there needs to be a revert of the sequencer migration 
 
 This will require using a specific contract present in the orbit-actions repo: SequencerInbox.sol. Due to the limitations of transparent upgradeable proxy contracts, after the initial migration has been performed, we will be unable to simply point the proxy back to the original implementaiton. This is due to a change in the storage slot layout. 
 
-This custom sequencerInbox.sol contracts is a version of the sequencer inbox contract that has the same functionality as the original sequencer inbox, but is compatible with the new storage slot layout.
+This custom SequencerInbox.sol contracts is a version of the sequencer inbox contract that has the same functionality as the original sequencer inbox, but is compatible with the new storage slot layout. These contracts are located inside the `migration` folder specific to the version.
 Deploying this sequencer inbox contract and deploying a new migration action with the env var `IS_REVERT` set to true will set up the revert migration action.
 This action can be performed via the upgrade executor to revert the rollup to it's previous behavior as needed.
 
 In order to properly deploy the revert migration action, you should temporarily replace the SequencerInbox.sol contract in lib/nitro-contracts/src/bridge with this contract. That will allow the DeployAndInitEspressoSequencerInbox.s.sol script in this repo to deploy this version of the contract.
+
+
+## 6. Generating Hardhat Artificats
+
+Each migration version (like 2.1.0 or 2.1.3) has a SequencerInbox.dbg.json and SequencerInbox.json file. These files are generated using the following command:
+
+```
+cd nitro-contracts
+yarn install & forge install
+yarn build:all
+```
+
+Then go inside `build/contracts/src/bridge/SequencerInbox.sol` inside `nitro-contracts` repo and you will find the generated files. Copy the files and add it to the appropriate migration folder.
