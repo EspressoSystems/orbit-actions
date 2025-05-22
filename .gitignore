@@ -21,5 +21,9 @@ out/
 !/broadcast
 /broadcast/*/31337/
 /broadcast/**/dry-run/
+broadcast/
+
 
 notes
+
+.DS_Store
