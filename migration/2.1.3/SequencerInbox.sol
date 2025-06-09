@@ -419,29 +419,6 @@ contract SequencerInbox is
     revert Deprecated();
   }
 
-  function _verifyAttestation(
-    uint256 sequenceNumber,
-    bytes calldata data,
-    uint256 afterDelayedMessagesRead,
-    IGasRefunder gasRefunder,
-    uint256 prevMessageCount,
-    uint256 newMessageCount,
-    bytes memory quote
-  ) private {
-    bytes32 reportDataHash = keccak256(
-      abi.encode(
-        sequenceNumber,
-        data,
-        afterDelayedMessagesRead,
-        address(gasRefunder),
-        prevMessageCount,
-        newMessageCount
-      )
-    );
-    espressoTEEVerifier.verify(quote, reportDataHash);
-    emit TEEAttestationQuoteVerified(sequenceNumber);
-  }
-
   function addSequencerL2BatchFromBlobs(
     uint256 sequenceNumber,
     uint256 afterDelayedMessagesRead,
@@ -523,30 +500,6 @@ contract SequencerInbox is
     bytes memory quote
   ) external refundsGas(gasRefunder, reader4844) {
     revert Deprecated();
-  }
-
-  function _verifyBlobQuote(
-    uint256 sequenceNumber,
-    uint256 afterDelayedMessagesRead,
-    IGasRefunder gasRefunder,
-    uint256 prevMessageCount,
-    uint256 newMessageCount,
-    bytes memory quote
-  ) private {
-    bytes32[] memory dataHashes = reader4844.getDataHashes();
-    if (dataHashes.length == 0) revert MissingDataHashes();
-    bytes32 reportDataHash = keccak256(
-      abi.encode(
-        sequenceNumber,
-        afterDelayedMessagesRead,
-        address(gasRefunder),
-        prevMessageCount,
-        newMessageCount,
-        abi.encode(dataHashes)
-      )
-    );
-    espressoTEEVerifier.verify(quote, reportDataHash);
-    emit TEEAttestationQuoteVerified(sequenceNumber);
   }
 
   /**
