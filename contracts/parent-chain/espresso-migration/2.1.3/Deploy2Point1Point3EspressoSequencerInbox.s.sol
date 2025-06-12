@@ -29,7 +29,8 @@ contract Deploy2Point1Point3EspressoSequencerInbox is DeploymentHelpersScript {
         IReader4844 reader = IReader4844(reader4844Addr);
         // deploy new SequencerInbox contract from v2.1.3
         address newErc20SeqInboxImpl = deployBytecodeWithConstructorFromJSON(
-            "/migration/espresso-2.1.3/SequencerInbox.sol/SequencerInbox.json", abi.encode(maxDataSize, reader, isUsingFeeToken)
+            "/migration/espresso-2.1.3/SequencerInbox.sol/SequencerInbox.json",
+            abi.encode(maxDataSize, reader, isUsingFeeToken)
         );
         vm.stopBroadcast();
     }
