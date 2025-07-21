@@ -52,8 +52,11 @@ The `isDelayBufferable` should be set to `false` for EspressoIntegration.
 $ cp .env-sample .env
 ```
 
-6. Run the prepare script, this will deploy the action with the specified configuration parameters. Note that `L1_PRIV_KEY` does not need to be the chain owner. Pass in the parent chain for `--network`; you can find the identifiers of these networks in the `hardhat.config.ts` file. Note that if your parent chain is an L1, you'll have to configure an additional `INFURA_KEY` env variable for its endpoint.
-   - Optionally, the script can try to verify the deployed contract by setting `DISABLE_VERIFICATION` to `false`. In that case, use the correct key for verifying the contracts on the block explorer depending on your parent chain: `ETHERSCAN_API_KEY | ARBISCAN_API_KEY | NOVA_ARBISCAN_API_KEY | BASESCAN_API_KEY`
+6. Run the prepare script, this will deploy the action with the specified configuration parameters. Please note the following requirements:
+
+- `L1_PRIV_KEY` does not need to be the chain owner
+- Pass in the parent chain for `--network`; you can find the identifiers of these networks in the `hardhat.config.ts` file. Note that if your parent chain is an L1, you'll have to configure an additional `INFURA_KEY` env variable for its endpoint.
+- Optionally, the script can try to verify the deployed contract by setting `DISABLE_VERIFICATION` to `false`. In that case, use the correct key for verifying the contracts on the block explorer depending on your parent chain: `ETHERSCAN_API_KEY | ARBISCAN_API_KEY | NOVA_ARBISCAN_API_KEY | BASESCAN_API_KEY`
 
 ```
 $ L1_PRIV_KEY=xxx yarn script:bold-prepare --network {mainnet|arb1|base|arbSepolia}
