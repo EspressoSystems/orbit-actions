@@ -44,7 +44,7 @@ $ yarn build:all
 $ cast call $SequencerInboxProxyAddress "espressoTEEVerifier()" --rpc-url $PARENT_CHAIN_RPC_URL
 ```
 
-The `isDelayBufferable` should be set to `false` for EspressoIntegration.
+The `isDelayBufferable` field should be set to `false` for EspressoIntegration.
 
 5. Setup .env in project root, make sure `CONFIG_NETWORK_NAME=custom`.
 
