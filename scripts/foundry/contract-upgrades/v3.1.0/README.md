@@ -24,10 +24,10 @@ $ git clone https://github.com/EspressoSystems/nitro-contracts.git
 $ cd nitro-contracts
 ```
 
-2. Checkout the v3.1.0-c6f2078 tag
+2. Checkout the v3.1.0-1ac4948 tag
 
 ```
-$ git checkout v3.1.0-c6f2078
+$ git checkout v3.1.0-1ac4948
 ```
 
 3. Install dependencies and build contracts
