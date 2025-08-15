@@ -8,3 +8,6 @@
 [submodule "lib/arbitrum-sdk"]
 	path = lib/arbitrum-sdk
 	url = https://github.com/Offchainlabs/arbitrum-sdk
+[submodule "lib/espresso-tee-contracts"]
+	path = lib/espresso-tee-contracts
+	url = https://github.com/EspressoSystems/espresso-tee-contracts
