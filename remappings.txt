@@ -1,0 +1,2 @@
+espresso-tee-contracts/=lib/nitro-contracts/lib/espresso-tee-contracts/src
+
