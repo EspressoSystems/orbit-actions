@@ -13,6 +13,8 @@ remappings = [
     "solady/=node_modules/solady/src",
     "@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
     "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+    "espresso-tee-contracts/=lib/nitro-contracts/lib/espresso-tee-contracts/src/",
+    "@automata-network/on-chain-pccs/=lib/nitro-contracts/lib/espresso-tee-contracts/lib/automata-dcap-attestation/lib/automata-on-chain-pccs/src/",
 ]
 test = 'test'
 cache_path = 'cache_forge'

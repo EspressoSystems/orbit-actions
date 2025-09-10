@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "nitro-contracts/challenge/IChallengeManager.sol";
-import "nitro-contracts/challenge/ChallengeManager.sol";
+import "nitro-contracts/challengeV2/IEdgeChallengeManager.sol";
+import "nitro-contracts/challengeV2/EdgeChallengeManager.sol";
 import "nitro-contracts/osp/OneStepProver0.sol";
 import "nitro-contracts/osp/OneStepProverMemory.sol";
 import "nitro-contracts/osp/OneStepProverMath.sol";
@@ -22,7 +22,7 @@ import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier
 
 contract MigrationTest is Test {
     IReader4844 dummyReader4844 = IReader4844(address(137));
-    address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true));
+    address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true, false));
     address mockTEEVerifier = address(new EspressoTEEVerifierMock());
     address oldBatchPosterAddr = address(0x01112);
     address newBatchPosterAddr = address(0x01113);
@@ -41,16 +41,18 @@ contract MigrationTest is Test {
     uint256 public constant MAX_FEE_PER_GAS = 1_000_000_000;
     uint256 public constant MAX_DATA_SIZE = 117_964;
 
-    BridgeCreator.BridgeContracts public ethBasedTemplates = BridgeCreator.BridgeContracts({
+    BridgeCreator.BridgeTemplates public ethBasedTemplates = BridgeCreator.BridgeTemplates({
         bridge: new Bridge(),
-        sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, false),
+        sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, false, false),
+        delayBufferableSequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, false, true),
         inbox: new Inbox(MAX_DATA_SIZE),
         rollupEventInbox: new RollupEventInbox(),
         outbox: new Outbox()
     });
-    BridgeCreator.BridgeContracts public erc20BasedTemplates = BridgeCreator.BridgeContracts({
+    BridgeCreator.BridgeTemplates public erc20BasedTemplates = BridgeCreator.BridgeTemplates({
         bridge: new ERC20Bridge(),
-        sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, true),
+        sequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, true, false),
+        delayBufferableSequencerInbox: new SequencerInbox(MAX_DATA_SIZE, dummyReader4844, true, true),
         inbox: new ERC20Inbox(MAX_DATA_SIZE),
         rollupEventInbox: new ERC20RollupEventInbox(),
         outbox: new ERC20Outbox()
@@ -72,7 +74,7 @@ contract MigrationTest is Test {
 
         (
             IOneStepProofEntry ospEntry,
-            IChallengeManager challengeManager,
+            IEdgeChallengeManager challengeManager,
             IRollupAdmin _rollupAdmin,
             IRollupUser _rollupUser
         ) = _prepareRollupDeployment();
@@ -88,7 +90,6 @@ contract MigrationTest is Test {
             _rollupAdmin,
             _rollupUser,
             upgradeExecutorLogic,
-            address(new ValidatorUtils()),
             address(new ValidatorWalletCreator()),
             deployHelper
         );
@@ -98,9 +99,12 @@ contract MigrationTest is Test {
         // deployment params
         ISequencerInbox.MaxTimeVariation memory timeVars =
             ISequencerInbox.MaxTimeVariation(((60 * 60 * 24) / 15), 12, 60 * 60 * 24, 60 * 60);
+
+        AssertionState memory emptyState = AssertionState(
+            GlobalState([bytes32(0), bytes32(0)], [uint64(0), uint64(0)]), MachineStatus.FINISHED, bytes32(0)
+        );
         Config memory config = Config({
             confirmPeriodBlocks: 20,
-            extraChallengeTimeBlocks: 200,
             stakeToken: address(0),
             baseStake: 1000,
             wasmModuleRoot: keccak256("wasm"),
@@ -108,8 +112,19 @@ contract MigrationTest is Test {
             loserStakeEscrow: address(200),
             chainId: 1337,
             chainConfig: "abc",
-            genesisBlockNum: 15_000_000,
             sequencerInboxMaxTimeVariation: timeVars,
+            layerZeroBlockEdgeHeight: 2 ** 5,
+            layerZeroBigStepEdgeHeight: 2 ** 5,
+            layerZeroSmallStepEdgeHeight: 2 ** 5,
+            minimumAssertionPeriod: 75,
+            validatorAfkBlocks: 201600,
+            anyTrustFastConfirmer: address(0),
+            numBigStepLevel: 3,
+            challengeGracePeriodBlocks: 201600,
+            miniStakeValues: new uint256[](1),
+            genesisAssertionState: emptyState,
+            genesisInboxCount: 0,
+            bufferConfig: BufferConfig({threshold: 0, max: 14400, replenishRateInBasis: 500}),
             espressoTEEVerifier: address(espressoTEEVerifier)
         });
 
@@ -133,7 +148,8 @@ contract MigrationTest is Test {
             nativeToken: address(0),
             deployFactoriesToL2: true,
             maxFeePerGasForRetryables: MAX_FEE_PER_GAS,
-            batchPosterManager: batchPosterManager
+            batchPosterManager: batchPosterManager,
+            feeTokenPricer: IFeeTokenPricer(address(0))
         });
         rollupAddress = rollupCreator.createRollup{value: factoryDeploymentFunds}(deployParams);
 
@@ -144,7 +160,7 @@ contract MigrationTest is Test {
         internal
         returns (
             IOneStepProofEntry ospEntry,
-            IChallengeManager challengeManager,
+            IEdgeChallengeManager challengeManager,
             IRollupAdmin rollupAdminLogic,
             IRollupUser rollupUserLogic
         )
@@ -153,7 +169,7 @@ contract MigrationTest is Test {
         ospEntry = new OneStepProofEntry(
             new OneStepProver0(), new OneStepProverMemory(), new OneStepProverMath(), new OneStepProverHostIo()
         );
-        challengeManager = new ChallengeManager();
+        challengeManager = new EdgeChallengeManager();
 
         //// deploy rollup logic
         rollupAdminLogic = IRollupAdmin(new RollupAdminLogic());
