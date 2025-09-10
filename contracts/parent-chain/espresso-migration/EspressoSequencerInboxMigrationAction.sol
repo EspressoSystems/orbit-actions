@@ -115,10 +115,13 @@ contract EspressoSequencerInboxMigrationAction {
         if (!isRevert) {
             proxyInbox.setEspressoTEEVerifier(espressoTEEVerifier);
         }
-        // Remove the permissions for the old batch poster addresses
-        proxyInbox.setIsBatchPoster(oldBatchPosterAddr, false);
-        // Whitelist the new batch posters address to enable it to post batches
-        proxyInbox.setIsBatchPoster(newBatchPosterAddr, true);
+
+        if (oldBatchPosterAddr != newBatchPosterAddr) {
+            // Remove the permissions for the old batch poster addresses
+            proxyInbox.setIsBatchPoster(oldBatchPosterAddr, false);
+            // Whitelist the new batch posters address to enable it to post batches
+            proxyInbox.setIsBatchPoster(newBatchPosterAddr, true);
+        }
         // Set the batch poster manager.
         if (batchPosterManager != address(0x0)) {
             proxyInbox.setBatchPosterManager(batchPosterManager);
