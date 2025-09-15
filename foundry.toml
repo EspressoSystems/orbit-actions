@@ -19,7 +19,7 @@ test = 'test'
 cache_path = 'cache_forge'
 solc_version = '0.8.25'
 optimizer = true
-optimizer_runs = 1
+optimizer_runs = 2000
 via_ir = true
 fs_permissions = [
     { access = "read", path = "node_modules/@offchainlabs/" },
