@@ -22,8 +22,9 @@
     "test:storage": "./test/storage/test-storage.bash",
     "orbit:contracts:version": "hardhat run scripts/orbit-versioner/orbitVersioner.ts",
     "gas-snapshot": "forge snapshot --match-path \"test/unit/**/*.t.sol\"",
-    "espresso-migration-2": "cp -r migration-to-espresso/2.1.3/* contracts/parent-chain/espresso-migration && forge build",
-    "espresso-migration-3": "cp -r migration-to-espresso/3.1.0/* contracts/parent-chain/espresso-migration && FOUNDRY_PROFILE=v3 forge build --skip EspressoMigrationAction.t.sol",
+    "clean-espresso": "rm -rf contracts/parent-chain/espresso-migration",
+    "espresso-migration-2": "yarn clean-espresso && cp -r espresso-migration-2 contracts/parent-chain/espresso-migration/ && forge build",
+    "espresso-migration-3": "yarn clean-espresso && cp -r espresso-migration-3 contracts/parent-chain/espresso-migration/ && FOUNDRY_PROFILE=v3 forge build",
     "fix": "yarn format; yarn test:sigs; yarn test:storage; yarn gas-snapshot"
   },
   "devDependencies": {
