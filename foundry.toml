@@ -63,7 +63,8 @@ remappings = [
     "espresso-tee-contracts/=lib/nitro-contracts-v3/lib/espresso-tee-contracts/src/",
     "@automata-network/dcap-attestation=lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation",
     "@automata-network/on-chain-pccs=lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation/lib/automata-on-chain-pccs/src",
-    "nitro-contracts=/lib/nitro-contracts-v3/src",
+    "nitro-contracts=/lib/nitro-contracts/src",
+    "nitro-contracts-v3=/lib/nitro-contracts-v3/src",
 ]
 test = 'test'
 cache_path = 'cache_forge_v3'
