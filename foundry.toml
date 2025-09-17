@@ -60,11 +60,13 @@ remappings = [
     "solady/=node_modules/solady/src",
     "@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
     "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
-    "espresso-tee-contracts/=lib/nitro-contracts/lib/espresso-tee-contracts/src/",
+    "espresso-tee-contracts/=lib/nitro-contracts-v3/lib/espresso-tee-contracts/src/",
     "@automata-network/dcap-attestation=lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation",
+    "@automata-network/on-chain-pccs=lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation/lib/automata-on-chain-pccs/src",
+    "nitro-contracts=/lib/nitro-contracts-v3/src",
 ]
 test = 'test'
-cache_path = 'cache_forge'
+cache_path = 'cache_forge_v3'
 solc_version = '0.8.25'
 optimizer = true
 optimizer_runs = 2000
