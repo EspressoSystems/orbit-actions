@@ -17,7 +17,7 @@ import "nitro-contracts/rollup/RollupUserLogic.sol";
 import "nitro-contracts/rollup/ValidatorUtils.sol";
 import "nitro-contracts/rollup/ValidatorWalletCreator.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import "../EspressoSequencerInboxMigrationAction.sol";
+import "../parent-chain/espresso-migration/EspressoSequencerInboxMigrationAction.sol";
 import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier.sol";
 
 contract MigrationTest is Test {

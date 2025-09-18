@@ -2,8 +2,8 @@
 pragma solidity ^0.8.9;
 
 import "forge-std/Script.sol";
-import "nitro-contracts-v3/bridge/SequencerInbox.sol";
-import "nitro-contracts-v3/bridge/ISequencerInbox.sol";
+import "nitro-contracts/bridge/SequencerInbox.sol";
+import "nitro-contracts/bridge/ISequencerInbox.sol";
 
 /// @notice This contract deploys and initializes a sequencerInbox contract that orbit chains can migrate to that enables compatibility
 /// with the espresso confirmation layer
@@ -22,13 +22,11 @@ contract DeployAndInitEspressoSequencerInbox is Script {
         // Trick the Vm into seeing that this opcode exsists and
         bytes memory code = vm.getDeployedCode("ArbSysMock.sol:ArbSysMock");
         vm.etch(0x0000000000000000000000000000000000000064, code);
-
-        bool delayBufferable = vm.envBool("DELAY_BUFFERABLE");
         // initialize interfaces needed
         IReader4844 reader = IReader4844(reader4844Addr);
         // Start broadcast to deploy the SequencerInbox
         vm.startBroadcast(deployerPrivateKey);
-        SequencerInbox sequencerInbox = new SequencerInbox(maxDataSize, reader, isUsingFeeToken, delayBufferable);
+        SequencerInbox sequencerInbox = new SequencerInbox(maxDataSize, reader, isUsingFeeToken);
 
         // Setting batch posters and batch poster manager
         vm.stopBroadcast();

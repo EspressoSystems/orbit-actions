@@ -4,13 +4,13 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-import "nitro-contracts-v3/bridge/ISequencerInbox.sol";
-import "nitro-contracts-v3/bridge/SequencerInbox.sol";
-import "nitro-contracts-v3/bridge/IBridge.sol";
-import "nitro-contracts-v3/bridge/IInbox.sol";
-import "nitro-contracts-v3/bridge/IOutbox.sol";
-import "nitro-contracts-v3/rollup/IRollupAdmin.sol";
-import "nitro-contracts-v3/rollup/IRollupLogic.sol";
+import "nitro-contracts/bridge/ISequencerInbox.sol";
+import "nitro-contracts/bridge/SequencerInbox.sol";
+import "nitro-contracts/bridge/IBridge.sol";
+import "nitro-contracts/bridge/IInbox.sol";
+import "nitro-contracts/bridge/IOutbox.sol";
+import "nitro-contracts/rollup/IRollupAdmin.sol";
+import "nitro-contracts/rollup/IRollupLogic.sol";
 
 /// @notice Upgrades an Arbitrum orbit chain to use a SequencerInbox contract compatible with Espresso
 /// @dev _newSequencerInboxImpl: This is the address of the SequencerInbox implementation to point rollup's upgradeable proxy to.

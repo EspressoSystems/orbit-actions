@@ -15,10 +15,7 @@ node_modules
 
 # Foundry: Compiler files
 cache_forge/
-cache_forge_v3/
 out/
-out_v3/
-contracts/parent-chain/espresso-migration/
 
 # Foundry: Ignores development broadcast logs
 !/broadcast

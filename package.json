@@ -11,7 +11,7 @@
     "upload-all-selectors": "forge build && find ./out -name \"*.json\" -exec cast upload-signature {} +",
     "format": "cat .prettierignore .gitignore > .pignore && prettier --ignore-path .pignore \"**/*.{js,ts,json}\" --write && rm .pignore && forge fmt",
     "lint": "tsc --noEmit && eslint . && forge fmt --check",
-    "build": "hardhat compile && espresso-migration-2",
+    "build": "hardhat compile && forge build",
     "clean": "hardhat clean && forge clean",
     "test:unit": "./test/unit/test-unit.bash",
     "test:fork": "./test/fork/test-fork.bash",
@@ -22,9 +22,6 @@
     "test:storage": "./test/storage/test-storage.bash",
     "orbit:contracts:version": "hardhat run scripts/orbit-versioner/orbitVersioner.ts",
     "gas-snapshot": "forge snapshot --match-path \"test/unit/**/*.t.sol\"",
-    "clean-espresso": "rm -rf contracts/parent-chain/espresso-migration",
-    "espresso-migration-2": "yarn clean-espresso && cp -r espresso-migration-2 contracts/parent-chain/espresso-migration/ && forge build",
-    "espresso-migration-3": "yarn clean-espresso && cp -r espresso-migration-3 contracts/parent-chain/espresso-migration/ && FOUNDRY_PROFILE=v3 forge build",
     "fix": "yarn format; yarn test:sigs; yarn test:storage; yarn gas-snapshot"
   },
   "devDependencies": {

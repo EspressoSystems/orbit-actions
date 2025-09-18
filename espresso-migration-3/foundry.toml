@@ -1,0 +1,26 @@
+[profile.default]
+src = '.'
+libs = ['../lib/nitro-contracts-v3', "../lib/forge-std", "../node_modules"]
+out = 'out_v3'
+
+script = ''
+test = ''
+
+solc_version = '0.8.25'
+evm_version = 'cancun'
+optimizer = true
+optimizer_runs = 2000
+via_ir = true
+
+remappings = [
+    "solady/=../node_modules/solady/src",
+    "nitro-contracts-v3=../lib/nitro-contracts-v3/src/",
+    "forge-std=../lib/forge-std/src/",
+    "ds-test/=../lib/forge-std/lib/ds-test/src/",
+    "@automata-network/dcap-attestation/=../lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation/",
+    "@automata-network=../lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation",
+    "@automata-network/on-chain-pccs=../lib/nitro-contracts-v3/lib/espresso-tee-contracts/lib/automata-dcap-attestation/lib/automata-on-chain-pccs/src",
+    "espresso-tee-contracts/=../lib/nitro-contracts-v3/lib/espresso-tee-contracts/src/",
+    "@openzeppelin/contracts-upgradeable/=../node_modules/@openzeppelin/contracts-upgradeable/",
+    "@openzeppelin/contracts/=../node_modules/@openzeppelin/contracts/",
+]
