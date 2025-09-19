@@ -7,5 +7,5 @@ This folder is a self-contained Foundry workspace dedicated to building and test
 Build this workspace (without impacting the root):
 
 ```cmd
-forge build --root ./espresso-migration-3
+forge build --root ./espresso-migration-3.1.0
 ```
