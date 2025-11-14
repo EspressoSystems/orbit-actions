@@ -1,5 +1,8 @@
 # Orbit Action Contracts
 
+> Important: This repository is a fork specifically for [nitro-espresso-integration](https://github.com/EspressoSystems/nitro-espresso-integration).
+> It may diverge from the upstream implementation. Use it only for this integration/migration scenario; for general-purpose usage, please refer to the upstream repository.
+
 A set of contracts that are similar to Arbitrum [gov-action-contracts](https://github.com/ArbitrumFoundation/governance/tree/main/src/gov-action-contracts), but are designed to be used with the Orbit chains.
 
 ## Requirments
