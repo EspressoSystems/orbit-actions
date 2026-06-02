@@ -2,8 +2,9 @@
 pragma solidity ^0.8.16;
 
 import {DeploymentHelpersScript} from "../../helper/DeploymentHelpers.s.sol";
-import {EspressoNitroContracts2Point1Point3UpgradeAction} from
-    "../../../../contracts/parent-chain/espresso-migration/2.1.3/EspressoNitroContracts2Point1Point3UpgradeAction.sol";
+import {
+    EspressoNitroContracts2Point1Point3UpgradeAction
+} from "../../../../contracts/parent-chain/espresso-migration/2.1.3/EspressoNitroContracts2Point1Point3UpgradeAction.sol";
 import {MockArbSys} from "../../helper/MockArbSys.sol";
 
 /**
