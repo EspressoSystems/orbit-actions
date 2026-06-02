@@ -18,12 +18,12 @@ import "nitro-contracts/rollup/ValidatorUtils.sol";
 import "nitro-contracts/rollup/ValidatorWalletCreator.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import "../parent-chain/espresso-migration/EspressoSequencerInboxMigrationAction.sol";
-import {EspressoTEEVerifierMock} from "nitro-contracts/mocks/EspressoTEEVerifier.sol";
+import {EspressoTEEVerifierSimpleMock} from "nitro-contracts/espresso/mocks/EspressoTEEVerifierSimpleMock.sol";
 
 contract MigrationTest is Test {
     IReader4844 dummyReader4844 = IReader4844(address(137));
     address newSequencerImplAddress = address(new SequencerInbox(1000, dummyReader4844, true));
-    address mockTEEVerifier = address(new EspressoTEEVerifierMock());
+    address mockTEEVerifier = address(new EspressoTEEVerifierSimpleMock());
     address oldBatchPosterAddr = address(0x01112);
     address newBatchPosterAddr = address(0x01113);
     address batchPosterManagerAddr = address(0x01114);
@@ -93,7 +93,7 @@ contract MigrationTest is Test {
             deployHelper
         );
 
-        EspressoTEEVerifierMock espressoTEEVerifier = new EspressoTEEVerifierMock();
+        EspressoTEEVerifierSimpleMock espressoTEEVerifier = new EspressoTEEVerifierSimpleMock();
 
         // deployment params
         ISequencerInbox.MaxTimeVariation memory timeVars =
