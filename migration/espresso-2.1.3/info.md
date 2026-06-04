@@ -2,5 +2,5 @@
 
 The hardhat artifacts were generated using the following commits:
 
-- nitro-contracts: 8e58a9e2612f2819a9060d99ca1fb33de4b1414b
-   - espresso-tee-contracts: 080c31ed8fa63f6a489cce74a139620fa8b5794b
+- nitro-contracts: 7de3d6cf672944b3a969eaa66a443025cae6f38e
+   - forge-std: e8a047e3f40f13fa37af6fe14e6e06283d9a060e
